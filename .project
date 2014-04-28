@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>Plugins</name>
+	<comment></comment>
+	<projects>
+		<project>plugin-memberImport</project>
+		<project>plugin-MuraPlayer</project>
+		<project>plugin-profile</project>
+	</projects>
+	<buildSpec>
+	</buildSpec>
+	<natures>
+		<nature>org.cfeclipse.cfml.CFENature</nature>
+	</natures>
+</projectDescription>

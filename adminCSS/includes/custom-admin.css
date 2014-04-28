@@ -1,0 +1,12 @@
+select[multiple] {
+    min-width: 400px; 
+    width:     400px;
+}
+
+.container{
+    width: 1175px;
+}
+
+.mura .mura-ui>.tab-content {
+     width: 1015px;
+}
