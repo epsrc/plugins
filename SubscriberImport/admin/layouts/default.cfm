@@ -51,9 +51,17 @@ http://www.apache.org/licenses/LICENSE-2.0
 									<li class="<cfif rc.action eq 'admin:main.default'>active</cfif>">
 										<a href="#buildURL('admin:main')#"><i class="icon-home"></i> Home</a>
 									</li>
+<!---
 									<li class="<cfif rc.action contains 'admin:main.another'>active</cfif>">
 										<a href="#buildURL('admin:main.another')#"><i class="icon-leaf"></i> Another Page</a>
 									</li>
+                                    <li class="<cfif rc.action contains 'admin:main.getStuff'>active</cfif>">
+                                        <a href="#buildURL('admin:main.getStuff')#"><i class="icon-leaf"></i> Get Stuff</a>
+                                    </li>
+ --->
+                                    <li class="<cfif rc.action contains 'admin:main.getImport'>active</cfif>">
+                                        <a href="#buildURL('admin:main.getImport')#"><i class="icon-leaf"></i> Subscriber Import</a>
+                                    </li>
 								</ul>
 							</li>
 							<li class="<cfif rc.action contains 'admin:license'>active</cfif>">
@@ -78,9 +86,17 @@ http://www.apache.org/licenses/LICENSE-2.0
 							<li class="<cfif rc.action eq 'admin:main.default'>active</cfif>">
 								<a href="#buildURL('admin:main')#"><i class="icon-home"></i> Home</a>
 							</li>
+<!---
 							<li class="<cfif rc.action eq 'admin:main.another'>active</cfif>">
 								<a href="#buildURL('admin:main.another')#"><i class="icon-leaf"></i> Another Page</a>
 							</li>
+                            <li class="<cfif rc.action eq 'admin:main.getStuff'>active</cfif>">
+                                <a href="#buildURL('admin:main.getStuff')#"><i class="icon-leaf"></i> Get Stuff</a>
+                            </li>
+ --->
+                            <li class="<cfif rc.action eq 'admin:main.getImport'>active</cfif>">
+                                <a href="#buildURL('admin:main.getImport')#"><i class="icon-leaf"></i> Subscriber Import</a>
+                            </li>
 						</ul>
 					</div>
 
