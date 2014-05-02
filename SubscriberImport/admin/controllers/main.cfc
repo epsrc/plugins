@@ -16,7 +16,7 @@ component persistent="false" accessors="true" output="false" extends="controller
 	}
 
     public any function doImport(required rc){
-        if (isDefined("rc.stuff")){
+        if (isDefined("rc.mailingListName")){
             rc.stuff = rc.mailingListName;
         }else{
             rc.stuff = 'Undefined';
