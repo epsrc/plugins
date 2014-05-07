@@ -18,12 +18,12 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 	// !important: enter the plugin packageName here. must be the same as found in '{context}/plugin/config.xml.cfm'
 	variables.framework.package = 'SubscriberImport';
-	variables.framework.packageVersion = '3.1.3';
+	variables.framework.packageVersion = '1.0.0';
 
 	// If true, then additional information is returned by the Application.onError() method
 	// and FW1 will 'reloadApplicationOnEveryRequest' (unless explicitly set otherwise below).
 	variables.framework.debugMode = true;
-	
+
 	// change to TRUE if you're developing the plugin so you can see changes in your controllers, etc.
 	variables.framework.reloadApplicationOnEveryRequest = variables.framework.debugMode ? true : false;
 
