@@ -10,3 +10,4 @@
 <cfset this.mappings["/profile"] = pluginDir & "/profile">
 <cfif not structKeyExists(this.mappings,"/test")><cfset this.mappings["/test"] = pluginDir & "/profile/lib"></cfif>
 <cfset this.mappings["/SubscriberImport"] = pluginDir & "/SubscriberImport">
+<cfset this.mappings["/FW1Example"] = pluginDir & "/FW1Example">
