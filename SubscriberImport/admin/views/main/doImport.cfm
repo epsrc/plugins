@@ -12,10 +12,12 @@ http://www.apache.org/licenses/LICENSE-2.0
 <cfoutput>
     <h2>Do Import</h2>
     <p>This form posts to itself, calling a service to do the import</p>
-    <cfif isDefined("rc.stuff")><p>#rc.stuff#</p></cfif>
+    <cfif structKeyExists(rc,"stuff") and isDefined("rc.stuff")><p>#rc.stuff#</p></cfif>
     <form action="#buildURL( 'main.doImport' )#" method="post">
         <input type="text" name="sometext">
         <input type="submit">
     </form>
+<!---
     <cfdump var="#$#">
+ --->
 </cfoutput>

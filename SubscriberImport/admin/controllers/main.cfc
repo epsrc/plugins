@@ -19,10 +19,16 @@ component persistent="false" accessors="true" output="false" extends="controller
         if (isDefined("rc.mailingListName")){
             rc.stuff = rc.mailingListName;
         }else{
-            rc.stuff = 'Undefined';
+            //rc.stuff = 'Undefined';
         }
     }
 
+    // From default.cfm 'admin:main.callService'
+    public any function callService(required rc){
+        args = {format = 'DDDD D MMMM YYYY'};
+        // function return value (result) goes into named var which is placed in rc context
+        variables.fw.service('demoService.getCurrentDate', 'serviceCallResult', args);
+    }
 <!---
     public any function saveStuff(required rc){
         rc.stuff = rc.sometext;
