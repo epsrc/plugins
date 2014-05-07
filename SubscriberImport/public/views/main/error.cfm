@@ -1,21 +1,7 @@
-<cfsilent>
-<!---
-
-This file is part of MuraFW1
-
-Copyright 2010-2014 Stephen J. Withington, Jr.
-Licensed under the Apache License, Version v2.0
-http://www.apache.org/licenses/LICENSE-2.0
-
-	NOTES:
-
---->
-	<cfscript>
-		request.layout = true;
-	</cfscript>
-</cfsilent>
+<cfscript>
+    request.layout = true;
+</cfscript>
 <cfoutput>
-
 	<div class="alert alert-error error">
 		<a class="close" data-dismiss="alert" href="##">&times;</a>
 		<cfif StructKeyExists(rc, 'isMissingView') and IsBoolean(rc.isMissingView) and rc.isMissingView>
@@ -26,7 +12,6 @@ http://www.apache.org/licenses/LICENSE-2.0
 			<p>We're sorry &hellip; but an unexpected error occurred. You can either <a href="javascript:history.go(-1);">go back and try again</a> or wait and give our Web Response Team some time to figure out what in the heck just happened. It's entirely up to you.</p>
 		</cfif>
 	</div>
-
 	<cfif IsBoolean(variables.framework.debugMode) and variables.framework.debugMode>
 		<div class="alert alert-info">
 			<a class="close" data-dismiss="alert" href="##">&times;</a>
@@ -38,5 +23,4 @@ http://www.apache.org/licenses/LICENSE-2.0
 			</cfloop>
 		</div>
 	</cfif>
-
 </cfoutput>

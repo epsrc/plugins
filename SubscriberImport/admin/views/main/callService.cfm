@@ -4,4 +4,7 @@
 <p>The current date is: #rc.serviceCallResult#</p>
 <p>The rc (request context) contains 2 components ($ and PC) and a few vars:</p>
 <cfdump var="#rc#">
+<!---
+<p>Here is an error: #rc.crap#</p>
+ --->
 </cfoutput>

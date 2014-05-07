@@ -7,7 +7,7 @@ Copyright 2010-2014 Stephen J. Withington, Jr.
 Licensed under the Apache License, Version v2.0
 http://www.apache.org/licenses/LICENSE-2.0
 
-    NOTES:
+    NOTES: BT,07.0514: onError() disabled in Aplication.cfc so that this is involed on error by FW/1
 
 --->
     <cfscript>
@@ -15,7 +15,6 @@ http://www.apache.org/licenses/LICENSE-2.0
     </cfscript>
 </cfsilent>
 <cfoutput>
-
     <div class="alert alert-error error">
         <a class="close" data-dismiss="alert" href="##">&times;</a>
         <cfif StructKeyExists(rc, 'isMissingView') and IsBoolean(rc.isMissingView) and rc.isMissingView>
@@ -28,9 +27,20 @@ http://www.apache.org/licenses/LICENSE-2.0
     </div>
 
     <cfif IsBoolean(variables.framework.debugMode) and variables.framework.debugMode>
+	    <cfscript>
+	        if (StructKeyExists(request,"exception")){
+	            WriteOutput('<h2>' & request.exception & ' - ERROR.CFM</h2>');
+	            WriteDump(request.exception);
+	        }
+	        if (StructKeyExists(request,"failedAction")){
+	            WriteOutput('<h2>' & request.failedAction & ' - ERROR.CFM</h2>');
+	            WriteDump(request.failedAction);
+	        }
+	    </cfscript>
+
         <div class="alert alert-info">
             <a class="close" data-dismiss="alert" href="##">&times;</a>
-            <h2>Debug Output</h2>
+            <h2>Debug Output from error.cfm</h2>
             <!--- <cfset local.scopes = 'application,arguments,cgi,client,cookie,form,local,request,server,session,url,variables'> --->
             <cfset local.scopes = 'local,request,session'>
             <cfloop list="#local.scopes#" index="s">
@@ -38,3 +48,4 @@ http://www.apache.org/licenses/LICENSE-2.0
             </cfloop>
         </div>
     </cfif>
+</cfoutput>

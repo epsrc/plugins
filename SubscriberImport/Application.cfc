@@ -6,7 +6,7 @@ Copyright 2010-2014 Stephen J. Withington, Jr.
 Licensed under the Apache License, Version v2.0
 http://www.apache.org/licenses/LICENSE-2.0
 
-	NOTES: 
+	NOTES:
 		Edit the setSessionCache() method to alter the 'expires' key.
 		Defaults to 1 hour. The sessionCache will also expire
 		if the application has been reloaded.
@@ -25,7 +25,7 @@ component persistent="false" accessors="true" output="false" extends="includes.f
 	variables.fw1Keys = 'SERVICEEXECUTIONCOMPLETE,LAYOUTS,CONTROLLEREXECUTIONCOMPLETE,VIEW,SERVICES,CONTROLLERS,CONTROLLEREXECUTIONSTARTED';
 
 	public string function doAction(string action='') {
-		var p = variables.framework.package; 
+		var p = variables.framework.package;
 		var fwa = variables.framework.action;
 		var local = {};
 
@@ -40,8 +40,8 @@ component persistent="false" accessors="true" output="false" extends="includes.f
 
 		restoreFlashContext();
 
-		request.context[fwa] = StructKeyExists(form, fwa) 
-			? form[fwa] : StructKeyExists(url, fwa) 
+		request.context[fwa] = StructKeyExists(form, fwa)
+			? form[fwa] : StructKeyExists(url, fwa)
 			? url[fwa] : StructKeyExists(request, fwa)
 			? request[fwa] : getFullyQualifiedAction(arguments.action);
 
@@ -49,15 +49,15 @@ component persistent="false" accessors="true" output="false" extends="includes.f
 
 		// viewKey: package_subsystem_section_item
 		local.viewKey = UCase(
-			p 
-			& '_' & getSubSystem(arguments.action) 
+			p
+			& '_' & getSubSystem(arguments.action)
 			& '_' & getSection(arguments.action)
 			& '_' & getItem(arguments.action)
 		);
 
 		local.response = getCachedView(local.viewKey);
 
-		local.newViewRequired = !Len(local.response) 
+		local.newViewRequired = !Len(local.response)
 			? true : getSubSystem(arguments.action) == getSubSystem(request.context[fwa])
 			? true : false;
 
@@ -116,8 +116,8 @@ component persistent="false" accessors="true" output="false" extends="includes.f
 
 		request.context.isAdminRequest = isAdminRequest();
 		request.context.isFrontEndRequest = isFrontEndRequest();
-		
-		if ( StructKeyExists(url, application.configBean.getAppReloadKey()) ) { 
+
+		if ( StructKeyExists(url, application.configBean.getAppReloadKey()) ) {
 			setupApplication();
 		};
 
@@ -138,24 +138,24 @@ component persistent="false" accessors="true" output="false" extends="includes.f
 		request.context.pluginConfig = application[variables.framework.applicationKey].pluginConfig;
 		request.context.action = request.context[variables.framework.action];
 	}
-	
+
 	public void function setupView() {
 		var httpRequestData = GetHTTPRequestData();
-		if ( 
-			StructKeyExists(httpRequestData.headers, 'X-#variables.framework.package#-AJAX') 
-			&& IsBoolean(httpRequestData.headers['X-#variables.framework.package#-AJAX']) 
-			&& httpRequestData.headers['X-#variables.framework.package#-AJAX'] 
+		if (
+			StructKeyExists(httpRequestData.headers, 'X-#variables.framework.package#-AJAX')
+			&& IsBoolean(httpRequestData.headers['X-#variables.framework.package#-AJAX'])
+			&& httpRequestData.headers['X-#variables.framework.package#-AJAX']
 		) {
 			setupResponse();
 		};
 	}
-	
+
 	public void function setupResponse() {
 		var httpRequestData = GetHTTPRequestData();
 		if (
-			StructKeyExists(httpRequestData.headers, 'X-#variables.framework.package#-AJAX') 
-			&& IsBoolean(httpRequestData.headers['X-#variables.framework.package#-AJAX']) 
-			&& httpRequestData.headers['X-#variables.framework.package#-AJAX'] 
+			StructKeyExists(httpRequestData.headers, 'X-#variables.framework.package#-AJAX')
+			&& IsBoolean(httpRequestData.headers['X-#variables.framework.package#-AJAX'])
+			&& httpRequestData.headers['X-#variables.framework.package#-AJAX']
 		) {
 			StructDelete(request.context, 'fw');
 			StructDelete(request.context, '$');
@@ -168,10 +168,10 @@ component persistent="false" accessors="true" output="false" extends="includes.f
 		var regx = '&?compactDisplay=[true|false]';
 		arguments.action = getFullyQualifiedAction(arguments.action);
 		if (
-			StructKeyExists(request.context, 'compactDisplay') 
-			&& IsBoolean(request.context.compactDisplay) 
-			&& !REFindNoCase(regx, arguments.action) 
-			&& !REFindNoCase(regx, arguments.queryString) 
+			StructKeyExists(request.context, 'compactDisplay')
+			&& IsBoolean(request.context.compactDisplay)
+			&& !REFindNoCase(regx, arguments.action)
+			&& !REFindNoCase(regx, arguments.queryString)
 		) {
 			var qs = 'compactDisplay=' & request.context.compactDisplay;
 			if ( !Find('?', arguments.action) ) {
@@ -191,16 +191,37 @@ component persistent="false" accessors="true" output="false" extends="includes.f
 		return super.isFrameworkInitialized() && StructKeyExists(application[variables.framework.applicationKey], 'cache');
 	}
 
-	
+
 	// ========================== Errors & Missing Views ==============================
 
-	public any function onError() output="true" {
+<!--- 	Including this borks the whole FW/1 attempt at providing contextual error handling
+        More Mura-obscura!
+
+        public any function onError() output="true" {
 		//var scopes = 'application,arguments,cgi,client,cookie,form,local,request,server,session,url,variables';
 		var scopes = 'local,request,session';
 		var arrScopes = ListToArray(scopes);
 		var i = '';
 		var scope = '';
-		WriteOutput('<h2>' & variables.framework.package & ' ERROR</h2>');
+        WriteOutput('<h2>' & variables.framework.package & ' - onError in application.cfc</h2>');
+        if (StructKeyExists(request,"exception")){
+            WriteOutput('<h2>' & request.exception & ' - ONERROR</h2>');
+        }
+        if (StructKeyExists(request,"failedAction")){
+            WriteOutput('<h2>' & request.failedAction & ' - ON ERROR</h2>');
+        }
+        <!--- All I really want is the stacktrace --->
+        var trace="";
+        var i=0;
+        var tracePoint="";
+        var total=0;
+        WriteOutput('<div id="mura-stacktrace" class="mura-stacktrace"><h3>Mura Stack Trace</h3><ol>');
+            for(i=1; i LTE ArrayLen(request.muraTraceRoute); i=i+1){
+                tracePoint = request.muraTraceRoute[i].detail;
+                WriteOutput(tracePoint);
+            }
+        WriteOutput('</ol></div>');
+
         writeDump(This);
 		if ( IsBoolean(variables.framework.debugMode) && variables.framework.debugMode ) {
 			for ( i=1; i <= ArrayLen(arrScopes); i++ ) {
@@ -209,7 +230,7 @@ component persistent="false" accessors="true" output="false" extends="includes.f
 			};
 		};
 		abort;
-	}
+	} --->
 
 	public any function onMissingView(any rc) {
 		rc.errors = [];
@@ -228,9 +249,9 @@ component persistent="false" accessors="true" output="false" extends="includes.f
 
 	public any function secureRequest() {
 		return !isAdminRequest() || (StructKeyExists(session, 'mura') && ListFindNoCase(session.mura.memberships,'S2')) ? true :
-				!StructKeyExists(session, 'mura') 
-				|| !StructKeyExists(session, 'siteid') 
-				|| !application.permUtility.getModulePerm(application[variables.framework.applicationKey].pluginConfig.getModuleID(), session.siteid) 
+				!StructKeyExists(session, 'mura')
+				|| !StructKeyExists(session, 'siteid')
+				|| !application.permUtility.getModulePerm(application[variables.framework.applicationKey].pluginConfig.getModuleID(), session.siteid)
 					? goToLogin() : true;
 	}
 
@@ -285,8 +306,8 @@ component persistent="false" accessors="true" output="false" extends="includes.f
 
 	private boolean function isCacheExpired() {
 		var p = variables.framework.package;
-		return !StructKeyExists(session, p) 
-				|| DateCompare(now(), session[p].expires, 's') == 1 
+		return !StructKeyExists(session, p)
+				|| DateCompare(now(), session[p].expires, 's') == 1
 				|| DateCompare(application.appInitializedTime, session[p].created, 's') == 1
 			? true : false;
 	}

@@ -62,6 +62,9 @@ http://www.apache.org/licenses/LICENSE-2.0
                                     <li class="<cfif rc.action contains 'admin:main.getImport'>active</cfif>">
                                         <a href="#buildURL('admin:main.getImport')#"><i class="icon-leaf"></i> Subscriber Import</a>
                                     </li>
+                                    <li class="<cfif rc.action eq 'admin:main.callService'>active</cfif>">
+                                        <a href="#buildURL('admin:main.callService')#"><i class="icon-leaf"></i> Call Service</a>
+                                    </li>
 								</ul>
 							</li>
 							<li class="<cfif rc.action contains 'admin:license'>active</cfif>">
