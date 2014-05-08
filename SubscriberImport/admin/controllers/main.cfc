@@ -17,30 +17,19 @@ component persistent="false" accessors="true" output="false" extends="controller
 
     public any function doImport(required rc){
         if (isDefined("rc.mailingListName")){
-            rc.stuff = rc.mailingListName;
+
+            // put all the form values and 'mura shit' in args for the import service cfc
+            args = {listName = rc.mailingListName,
+                    fileDelim = rc.configBean.getFileDelim(),
+                    listBean = rc.listBean,
+                    configBean = rc.configBean,
+                    utilityCfc = rc.utility};
+
+            // invoke IMPORT service here...
+            variables.fw.service('importCSVFile.doImport', 'importServiceResult', args);
         }else{
-            //rc.stuff = 'Undefined';
+            rc.importServiceResult = 'Something went wrong when trying to do an import based on what you entered!';
         }
     }
 
-    // From default.cfm 'admin:main.callService'
-    public any function callService(required rc){
-        args = {format = 'DDDD D MMMM YYYY'};
-        // function return value (result) goes into named var which is placed in rc context
-        variables.fw.service('demoService.getCurrentDate', 'serviceCallResult', args);
-    }
-<!---
-    public any function saveStuff(required rc){
-        rc.stuff = rc.sometext;
-    }
-
-    public any function doSomethingLikeCallWebService(required rc){
-        rc.resultOfPost = "Let's pretend I called a webservice!"
-        // attempt to redirect back to the posting Form - CAREFUL - THIS FUCKS UP EVERYTHING !!!
-        // variables.fw.redirect( "main.saveStuff");
-    }
-
-    public any function getImport(required rc){
-        rc.defaultMemberList = 'Call Alert';
-    } --->
 }

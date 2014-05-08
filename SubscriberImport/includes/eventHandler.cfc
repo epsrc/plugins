@@ -20,8 +20,13 @@ component persistent="false" accessors="true" output="false" extends="mura.plugi
 		getApplication().setupApplication();
 		// register this file as a Mura eventHandler
 		variables.pluginConfig.addEventHandler(this);
+
+        // BOLLOCKS - ANOTHER PATHWAY MURA-OBSCURA (shit creek paddle etc)!
+        //variables.configBean = $.getServiceFactory().getBean('configBean');
+        //variables.pluginConfig.setSetting("pluginPath","#variables.configBean.getContext()#/plugins/#variables.pluginConfig.getDirectory()#/");
+        //variables.listBean = getServiceFactory().getBean('mailinglist');
 	}
-	
+
 	public void function onSiteRequestStart(required struct $) {
 		arguments.$.setCustomMuraScopeKey(variables.framework.package, getApplication());
 	}

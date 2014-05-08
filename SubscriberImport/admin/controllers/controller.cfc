@@ -20,10 +20,12 @@ component persistent="false" accessors="true" output="false" extends="mura.cfobj
 	}
 
 	public any function before(required struct rc) {
+
 		if ( StructKeyExists(rc, '$') ) {
 			var $ = rc.$;
 			set$(rc.$);
 		}
+
 
 		// easy access to site attributes
 		// rc.settingsManager = rc.$.getBean('settingsManager');
@@ -33,10 +35,17 @@ component persistent="false" accessors="true" output="false" extends="mura.cfobj
 		// rc.rsSites = rc.pc.getAssignedSites();
 		// rc.listSites = ValueList(rc.rsSites.siteid);
 
+
+
+        // NOT BOLLOCKS - HERE IS A WAY (that works) TO GET TO THE LOT...
+        rc.configBean = rc.$.getBean('configBean');
+        //variables.pluginConfig.setSetting("pluginPath","#rc.configBean.getContext()#/plugins/#variables.pluginConfig.getDirectory()#/");
+        rc.listBean = rc.$.getServiceFactory().getBean('mailinglist');
+
+        rc.utility = rc.$.getServiceFactory().getBean('utility');
+
 		if ( rc.isFrontEndRequest ) {
 			location(url='#rc.$.globalConfig('context')#/', addtoken=false);
 		}
-
 	}
-
 }

@@ -10,10 +10,10 @@ http://www.apache.org/licenses/LICENSE-2.0
 --->
 </cfsilent>
 <cfoutput>
-    <h2>Do Import</h2>
-    <p>This form posts to itself, calling a service to do the import</p>
-    <cfif structKeyExists(rc,"stuff") and isDefined("rc.stuff")><p>#rc.stuff#</p></cfif>
-    <form action="#buildURL( 'main.doImport' )#" method="post">
+    <h2>Results Form</h2>
+    <p>This form is 'requested' because it has the same name as the doImport service?</p>
+    <cfif structKeyExists(rc,"importServiceResult") and isDefined("rc.importServiceResult")><p>#rc.importServiceResult#</p></cfif>
+    <form action="#buildURL( 'main.doImport' )#" method="post" enctype="multipart/form-data">
         <input type="text" name="sometext">
         <input type="submit">
     </form>
