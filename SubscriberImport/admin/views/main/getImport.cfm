@@ -28,14 +28,15 @@ http://www.apache.org/licenses/LICENSE-2.0
         <div class="control-group">
             <label class="control-label">Mailing List</label>
             <div class="controls">
-            <select name="mailingListName" onchange="" >
+            <select name="mailingListName" onchange="">
                 <option value="Call Alert" selected>Call Alert</option>
+                <option value="Another List">Another List</option>
             </select>
             </div>
         </div>
 
         <div class="control-group">
-            <label class="control-label">Upload List Maintenance File (Optional)</label>
+            <label class="control-label">Subscriber maintenance</label>
             <div class="controls">
             <label for="da" class="radio inline">
                 <input type="radio" name="direction" id="da" value="add" checked>Add to List (if don't exist)
@@ -44,7 +45,7 @@ http://www.apache.org/licenses/LICENSE-2.0
                 <input type="radio" name="direction" id="dm" value="remove">Remove from List (if found)
             </label>
             <label for="dp" class="radio inline">
-                <input type="radio" name="direction" id="dp" value="replace">Replace all (recreates entire list)
+                <input type="radio" name="direction" id="dp" value="replace">Replace all (recreate list)
             </label>
             </div>
         </div>
@@ -58,7 +59,7 @@ http://www.apache.org/licenses/LICENSE-2.0
             </div>
         </div>
         <div class="form-actions">
-            <input type="submit" value="Upload" class="btn">
+            <input type="submit" value="Import" class="btn">
         </div>
 
 </div>

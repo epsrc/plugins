@@ -1,13 +1,12 @@
 /*
 
-This file is part of MuraFW1
+This file was part of MuraFW1
 
 Copyright 2010-2014 Stephen J. Withington, Jr.
 Licensed under the Apache License, Version v2.0
 http://www.apache.org/licenses/LICENSE-2.0
 
-	NOTES:
-		All ADMIN controllers should EXTEND this file.
+    NB: All ADMIN controllers should EXTEND this file.
 
 */
 component persistent="false" accessors="true" output="false" extends="mura.cfobject" {
@@ -25,8 +24,6 @@ component persistent="false" accessors="true" output="false" extends="mura.cfobj
 			var $ = rc.$;
 			set$(rc.$);
 		}
-
-
 		// easy access to site attributes
 		// rc.settingsManager = rc.$.getBean('settingsManager');
 		// rc.siteBean = rc.settingsManager.getSite(rc.$.siteConfig('siteid'));
@@ -34,8 +31,6 @@ component persistent="false" accessors="true" output="false" extends="mura.cfobj
 		// rc.rsAllSites = rc.settingsManager.getList();
 		// rc.rsSites = rc.pc.getAssignedSites();
 		// rc.listSites = ValueList(rc.rsSites.siteid);
-
-
 
         // NOT BOLLOCKS - HERE IS A WAY (that works) TO GET TO THE LOT...
         rc.configBean = rc.$.getBean('configBean');
