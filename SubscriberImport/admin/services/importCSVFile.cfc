@@ -42,15 +42,11 @@
     </cfif>
 
     <cfloop list="#templist#" index="I" delimiters="|">
-
     <!--- I think this looked for email as first field
     <cfif REFindNoCase("^[^@%*<>' ]+@[^@%*<>' ]{1,255}\.[^@%*<>' ]{2,5}", trim(listFirst(i,chr(9)))) neq 0 >  --->
-
-    <cfif arguments.direction eq 'add' or arguments.direction eq 'replace'>
-
-        <cfset I = arguments.utility.listFix(I,chr(44),"_null_")>
-
-        <cfif (UCASE(listFirst(I,chr(44)) neq "ID")) and UCASE(listFirst(I,chr(9)) neq "EMAIL") >
+    <cfset I = arguments.utility.listFix(I,chr(44),"_null_")>
+        <cfif ((arguments.direction eq 'add') OR (arguments.direction eq 'replace')) AND
+               (UCASE(listFirst(I,chr(44)) neq "ID") AND UCASE(listFirst(I,chr(9)) neq "EMAIL")) >
 
             <cfset ID = listgetat(I,1,chr(44))/>
             <cfset var email = listgetat(I,2,chr(44))/>
@@ -62,70 +58,63 @@
                 <cfset data.siteid = arguments.siteid />
                 <cfset data.isVerified = active />
                 <cfset data.email = email />
-                <cfset data.fname = email />
-                <cfset data.lname = email />
-                <cfset data.company = email />
+                <cfset data.fname = '' />
+                <cfset data.lname = '' />
+                <cfset data.company = '' />
             <cfcatch></cfcatch>
             </cftry>
 
-        <cfset arguments.mailinglistManager.createMember(data) />
-        <!--- and also create a site Member/User if he/she doesn't yet have an email listed in site members (users) --->
+            <cfset arguments.mailinglistManager.createMember(data) />
 
-<!--- <cfdump var="#arguments.listBean.getMLID()#">
-<cfdump var="#arguments.direction#">
-<cfdump var="#arguments.configBean.getTempDir()##cffile.serverFile#">
-<cfdump var="#templist#">
-<cfdump var="#data#">
-<cfabort> --->
+            <!--- and also create a site Member/User if he/she doesn't yet have an email listed in site members (users) --->
+	        <cfscript>
+	            // USER feed bean stuff
+	            // if user(s) belong to a different site, specify desired siteid
+	            // userFeed.setSiteID('someSiteID');
 
-        <cfscript>
-            // USER feed bean stuff
-            // if user(s) belong to a different site, specify desired siteid
-            // userFeed.setSiteID('someSiteID');
+	            // if you know the groupid, you can filter that
+	            // userFeed.setGroupID('someGroupID', false);
 
-            // if you know the groupid, you can filter that
-            // userFeed.setGroupID('someGroupID', false);
+	            // filter only users of a specific subType
+	            // userFeed.addParam(
+	            //  relationship='AND'
+	            //  , field='tusers.subtype'
+	            //  , condition='EQUALS'
+	            //  , criteria='Physician'
+	            //  , dataType='varchar'
+	            // );
 
-            // filter only users of a specific subType
-            // userFeed.addParam(
-            //  relationship='AND'
-            //  , field='tusers.subtype'
-            //  , condition='EQUALS'
-            //  , criteria='Physician'
-            //  , dataType='varchar'
-            // );
+	            // the iterator!
+	            userIterator = arguments.userFeed.getIterator();
+	        </cfscript>
 
-            // the iterator!
-            userIterator = arguments.userFeed.getIterator();
-        </cfscript>
-        <cfoutput>
-            <cfif userIterator.hasNext()>
-                <ul>
-                    <cfloop condition="userIterator.hasNext()">
-                        <cfset user = userIterator.next() />
-                        <li>
-                            #HTMLEditFormat(user.getValue('lname'))#, #HTMLEditFormat(user.getValue('fname'))#<br />
-                            #HTMLEditFormat(user.getValue('someExtendedAttributeNameGoesHere'))#
-                            <!--- <cfdump var="#user.getAllValues()#" /> --->
-                        </li>
-                    </cfloop>
-                </ul>
-            <cfelse>
-                <div class="alert alert-info alert-dismissable">
-                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-                    <strong>Yo!</strong> No users match the filter criteria.
-                </div>
-            </cfif>
-        </cfoutput>
+	        <cfoutput>
+	            <cfif userIterator.hasNext()>
+	                <ul>
+	                    <cfloop condition="userIterator.hasNext()">
+	                        <cfset user = userIterator.next() />
+	                        <li>
+	                            #HTMLEditFormat(user.getValue('lname'))#, #HTMLEditFormat(user.getValue('fname'))#<br />
+	                            #HTMLEditFormat(user.getValue('someExtendedAttributeNameGoesHere'))#
+	                            <!--- <cfdump var="#user.getAllValues()#" /> --->
+	                        </li>
+	                    </cfloop>
+	                </ul>
+	            <cfelse>
+	                <div class="alert alert-info alert-dismissable">
+	                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+	                    <strong>Yo!</strong> No users match the filter criteria.
+	                </div>
+	            </cfif>
+	        </cfoutput>
 
         <cfelseif  arguments.direction eq 'remove'>
             <cfquery>
             delete from tmailinglistmembers where email=<cfqueryparam cfsqltype="cf_sql_varchar" value="#email#" /> and
-                        mlid=<cfqueryparam cfsqltype="cf_sql_varchar" value="#arguments.listBean.getMLID()#" /> and
-                        siteid=<cfqueryparam cfsqltype="cf_sql_varchar" value="#arguments.listBean.getSiteID()#" />
+                        mlid=<cfqueryparam cfsqltype="cf_sql_varchar" value="#local.MLID()#" /> and
+                        siteid=<cfqueryparam cfsqltype="cf_sql_varchar" value="#arguments.SiteID#" />
             </cfquery>
         </cfif>
-    </cfif>
     </cfloop>
 
     <cffile ACTION="delete"
