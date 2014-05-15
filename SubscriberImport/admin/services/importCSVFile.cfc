@@ -8,12 +8,12 @@
     <cfreturn this />
 </cffunction>
 
-<cffunction name="upload" access="public" returntype="string" output="false">
+<cffunction name="upload" access="public" returntype="string" output="true">
     <cfargument name="listBean" type="any" />
     <cfargument name="configBean" type="any" />
     <cfargument name="direction" type="string" />
     <cfargument name="utility" type="any" />
-    <cfargument name="userfeed" type="any" />
+    <cfargument name="userManager" type="any" />
     <cfargument name="mailingListManager" type="any" />
     <cfargument name="siteid" type="string" />
 
@@ -22,6 +22,7 @@
     <cfset var data = "">
     <cfset var I = 0/>
 
+    <!--- local.MLID should be a current one and therefore already exist (remember here we are updating existing Mailing Lists --->
     <cfset var local.MLID = arguments.mailingListManager.read('', arguments.siteid, listBean.getName()).getAllValues().MLID />
     <cfif not Len(local.MLID)>
         <cfset local.MLID = arguments.listBean.getMLID() />
@@ -68,31 +69,15 @@
 
             <!--- and also create a site Member/User if he/she doesn't yet have an email listed in site members (users) --->
 	        <cfscript>
-	            // USER feed bean stuff
-	            // if user(s) belong to a different site, specify desired siteid
-	            // userFeed.setSiteID('someSiteID');
-
-	            // if you know the groupid, you can filter that
-	            // userFeed.setGroupID('someGroupID', false);
-
-	            // filter only users of a specific subType
-	            // userFeed.addParam(
-	            //  relationship='AND'
-	            //  , field='tusers.subtype'
-	            //  , condition='EQUALS'
-	            //  , criteria='Physician'
-	            //  , dataType='varchar'
-	            // );
-
 	            // the iterator!
-	            userIterator = arguments.userFeed.getIterator();
+                var local.userIterator = arguments.userManager.readByGroupName('Call Alert',arguments.siteid).GETMEMBERSITERATOR();
 	        </cfscript>
 
 	        <cfoutput>
-	            <cfif userIterator.hasNext()>
+	            <cfif local.userIterator.hasNext()>
 	                <ul>
-	                    <cfloop condition="userIterator.hasNext()">
-	                        <cfset user = userIterator.next() />
+	                    <cfloop condition="local.userIterator.hasNext()">
+	                        <cfset user = local.userIterator.next() />
 	                        <li>
 	                            #HTMLEditFormat(user.getValue('lname'))#, #HTMLEditFormat(user.getValue('fname'))#<br />
 	                            #HTMLEditFormat(user.getValue('someExtendedAttributeNameGoesHere'))#
@@ -103,7 +88,7 @@
 	            <cfelse>
 	                <div class="alert alert-info alert-dismissable">
 	                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-	                    <strong>Yo!</strong> No users match the filter criteria.
+	                    <strong>Yo!</strong>No users belong to this Mailing Group yet!
 	                </div>
 	            </cfif>
 	        </cfoutput>
@@ -129,7 +114,7 @@
         var data = structNew();
 
         // don't ask me why but fucking Mura can only cope with the args var being called arguments
-        // even though it would make more sense to call it rc because that's tthe fucking thing it passes in!!!
+        // even though it would make more sense to call it rc because that's the fucking thing it passes in!!!
         // Confusion + Obscura - what a winning combination!!!
 
         data.name = arguments.mailingListName;
@@ -141,12 +126,13 @@
         // 'set' the listBean to the one we are changing here - needs to be existing if already exists, otherwise a new one
         arguments.listBean.set(data);
 
-        // DO NOT EVEN FUCKING ASK - FOR 'arguments' here, read 'rc' !!!
+        // DO NOT EVEN FUCKING ASK - FOR 'arguments' here, read 'rc', i.e. what WAS already avaiable as rc. in controller and main .cfc's
+        // here has to be bastardised as 'arguments' - fuck's sake !!!
         if (upload( arguments.listBean
                    ,arguments.configBean
                    ,arguments.direction
                    ,arguments.utility
-                   ,arguments.userfeed
+                   ,arguments.userManager
                    ,arguments.mailinglistManager
                    ,arguments.siteid
             )){
