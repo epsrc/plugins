@@ -17,37 +17,31 @@
     <cfargument name="mailingListManager" type="any" />
     <cfargument name="siteid" type="string" />
 
-<cfdump var="#arguments.mailingListManager.getList(arguments.siteid)#">
-<cfdump var="#arguments.listBean.getMLID()#">
-<cfabort>
+    <cfset var templist = "" />
+    <cfset var fieldlist = "" />
+    <cfset var data = "">
+    <cfset var I = 0/>
 
-    <cfset var templist ="" />
-    <cfset var fieldlist ="" />
-    <cfset var data="">
-    <cfset var I=0/>
-
-<!---
-    <cfif StructKeyExists(arguments, "direction") and not Len(arguments.direction)>
-        <cfset arguments.direction="replace" />
+    <cfset var local.MLID = arguments.mailingListManager.read('', arguments.siteid, listBean.getName()).getAllValues().MLID />
+    <cfif not Len(local.MLID)>
+        <cfset local.MLID = arguments.listBean.getMLID() />
     </cfif>
- --->
 
     <cffile ACTION="upload"
             destination="#arguments.configBean.getTempDir()#"
             filefield="listfile"
             nameconflict="makeunique" >
-
-    <!--- Need to establish where cffile.serverfile 'is' --->
+    <!--- cffile.serverfile is 'set' by cffile action above --->
     <cffile file="#arguments.configBean.getTempDir()##cffile.serverFile#"
             variable="tempList"
             action="read" >
 
     <cfset tempList = "#reReplace(tempList,"(#chr(13)##chr(10)#|#chr(10)#|#chr(13)#)|\n|(\r\n)","|","all")#">
     <cfif arguments.direction eq 'replace'>
-        <cfset arguments.mailingListManager.deleteMembers(arguments.listBean.getMLID(), arguments.siteid) />
+        <cfset arguments.mailingListManager.deleteMembers(local.MLID, arguments.siteid) />
     </cfif>
 
-    <cfloop list="#templist#" index="I"  delimiters="|">
+    <cfloop list="#templist#" index="I" delimiters="|">
 
     <!--- I think this looked for email as first field
     <cfif REFindNoCase("^[^@%*<>' ]+@[^@%*<>' ]{1,255}\.[^@%*<>' ]{2,5}", trim(listFirst(i,chr(9)))) neq 0 >  --->
@@ -56,28 +50,33 @@
 
         <cfset I = arguments.utility.listFix(I,chr(44),"_null_")>
 
-    <cfif listFirst(I,chr(44)) neq "ID">
+        <cfif (UCASE(listFirst(I,chr(44)) neq "ID")) and UCASE(listFirst(I,chr(9)) neq "EMAIL") >
 
-        <cfset ID = listgetat(I,1,chr(44))/>
-        <cfset var email = listgetat(I,2,chr(44))/>
-        <cfset var active = listgetat(I,3,chr(44))/>
+            <cfset ID = listgetat(I,1,chr(44))/>
+            <cfset var email = listgetat(I,2,chr(44))/>
+            <cfset var active = listgetat(I,3,chr(44))/>
 
-        <cftry>
-
-            <cfset data=structNew()>
-            <cfset data.mlid=arguments.listBean.getMLID() />
-            <cfset data.siteid=arguments.listBean.getsiteid() />
-            <cfset data.isVerified=1 />
-            <cfset data.email=email />
-            <cfset data.fname="" />
-            <cfset data.lname="" />
-            <cfset data.company="" />
-
-        <cfcatch></cfcatch>
-        </cftry>
+            <cftry>
+                <cfset data = structNew()>
+                <cfset data.mlid = local.MLID />
+                <cfset data.siteid = arguments.siteid />
+                <cfset data.isVerified = active />
+                <cfset data.email = email />
+                <cfset data.fname = email />
+                <cfset data.lname = email />
+                <cfset data.company = email />
+            <cfcatch></cfcatch>
+            </cftry>
 
         <cfset arguments.mailinglistManager.createMember(data) />
         <!--- and also create a site Member/User if he/she doesn't yet have an email listed in site members (users) --->
+
+<!--- <cfdump var="#arguments.listBean.getMLID()#">
+<cfdump var="#arguments.direction#">
+<cfdump var="#arguments.configBean.getTempDir()##cffile.serverFile#">
+<cfdump var="#templist#">
+<cfdump var="#data#">
+<cfabort> --->
 
         <cfscript>
             // USER feed bean stuff
@@ -132,7 +131,7 @@
     <cffile ACTION="delete"
             file="#arguments.configBean.getTempDir()##cffile.serverfile#" >
 
-    <cfreturn 'OK'/>
+    <cfreturn true/>
 </cffunction>
 
 <cfscript>
@@ -150,7 +149,7 @@
         data.siteid = arguments.siteid;
         data.description = "Call Alert list (maintained via plugin)";
 
-        // 'set' the listBean to the one we are changing here
+        // 'set' the listBean to the one we are changing here - needs to be existing if already exists, otherwise a new one
         arguments.listBean.set(data);
 
         // DO NOT EVEN FUCKING ASK - FOR 'arguments' here, read 'rc' !!!
