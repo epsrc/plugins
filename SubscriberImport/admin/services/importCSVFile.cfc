@@ -8,16 +8,29 @@
     <cfreturn this />
 </cffunction>
 
-<cffunction name="upload" access="public" returntype="void" output="false">
-    <cfargument name="direction" type="string" />
+<cffunction name="upload" access="public" returntype="string" output="false">
     <cfargument name="listBean" type="any" />
     <cfargument name="configBean" type="any" />
-    <cfargument name="utilityCfc" type="any" />
+    <cfargument name="direction" type="string" />
+    <cfargument name="utility" type="any" />
+    <cfargument name="userfeed" type="any" />
+    <cfargument name="mailingListManager" type="any" />
+    <cfargument name="siteid" type="string" />
+
+<cfdump var="#arguments.mailingListManager.getList(arguments.siteid)#">
+<cfdump var="#arguments.listBean.getMLID()#">
+<cfabort>
 
     <cfset var templist ="" />
     <cfset var fieldlist ="" />
     <cfset var data="">
     <cfset var I=0/>
+
+<!---
+    <cfif StructKeyExists(arguments, "direction") and not Len(arguments.direction)>
+        <cfset arguments.direction="replace" />
+    </cfif>
+ --->
 
     <cffile ACTION="upload"
             destination="#arguments.configBean.getTempDir()#"
@@ -31,7 +44,7 @@
 
     <cfset tempList = "#reReplace(tempList,"(#chr(13)##chr(10)#|#chr(10)#|#chr(13)#)|\n|(\r\n)","|","all")#">
     <cfif arguments.direction eq 'replace'>
-        <cfset application.mailingListManager.deleteMembers(arguments.listBean.getMLID(),arguments.listBean.getSiteID()) />
+        <cfset arguments.mailingListManager.deleteMembers(arguments.listBean.getMLID(), arguments.siteid) />
     </cfif>
 
     <cfloop list="#templist#" index="I"  delimiters="|">
@@ -41,7 +54,7 @@
 
     <cfif arguments.direction eq 'add' or arguments.direction eq 'replace'>
 
-        <cfset I = arguments.utilityCfc.listFix(I,chr(44),"_null_")>
+        <cfset I = arguments.utility.listFix(I,chr(44),"_null_")>
 
     <cfif listFirst(I,chr(44)) neq "ID">
 
@@ -50,21 +63,61 @@
         <cfset var active = listgetat(I,3,chr(44))/>
 
         <cftry>
+
             <cfset data=structNew()>
             <cfset data.mlid=arguments.listBean.getMLID() />
             <cfset data.siteid=arguments.listBean.getsiteid() />
-
             <cfset data.isVerified=1 />
-
             <cfset data.email=email />
             <cfset data.fname="" />
             <cfset data.lname="" />
             <cfset data.company="" />
+
         <cfcatch></cfcatch>
         </cftry>
 
-        <cfset application.mailinglistManager.createMember(data) />
+        <cfset arguments.mailinglistManager.createMember(data) />
         <!--- and also create a site Member/User if he/she doesn't yet have an email listed in site members (users) --->
+
+        <cfscript>
+            // USER feed bean stuff
+            // if user(s) belong to a different site, specify desired siteid
+            // userFeed.setSiteID('someSiteID');
+
+            // if you know the groupid, you can filter that
+            // userFeed.setGroupID('someGroupID', false);
+
+            // filter only users of a specific subType
+            // userFeed.addParam(
+            //  relationship='AND'
+            //  , field='tusers.subtype'
+            //  , condition='EQUALS'
+            //  , criteria='Physician'
+            //  , dataType='varchar'
+            // );
+
+            // the iterator!
+            userIterator = arguments.userFeed.getIterator();
+        </cfscript>
+        <cfoutput>
+            <cfif userIterator.hasNext()>
+                <ul>
+                    <cfloop condition="userIterator.hasNext()">
+                        <cfset user = userIterator.next() />
+                        <li>
+                            #HTMLEditFormat(user.getValue('lname'))#, #HTMLEditFormat(user.getValue('fname'))#<br />
+                            #HTMLEditFormat(user.getValue('someExtendedAttributeNameGoesHere'))#
+                            <!--- <cfdump var="#user.getAllValues()#" /> --->
+                        </li>
+                    </cfloop>
+                </ul>
+            <cfelse>
+                <div class="alert alert-info alert-dismissable">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                    <strong>Yo!</strong> No users match the filter criteria.
+                </div>
+            </cfif>
+        </cfoutput>
 
         <cfelseif  arguments.direction eq 'remove'>
             <cfquery>
@@ -79,29 +132,40 @@
     <cffile ACTION="delete"
             file="#arguments.configBean.getTempDir()##cffile.serverfile#" >
 
+    <cfreturn 'OK'/>
 </cffunction>
 
 <cfscript>
-    public any function doImport(args arguments) {
+    public string function doImport(args arguments) {
         // So here we can write a CSV import routine ?
         var data = structNew();
 
-        data.name = "Call Alert";
+        // don't ask me why but fucking Mura can only cope with the args var being called arguments
+        // even though it would make more sense to call it rc because that's tthe fucking thing it passes in!!!
+        // Confusion + Obscura - what a winning combination!!!
+
+        data.name = arguments.mailingListName;
         data.isPublic = "1";
         data.isPurge = "0";
-        data.siteid = arguments.$.getSite().getSiteID();
-        data.description = "Call Alert list (maintained via plugin)"
+        data.siteid = arguments.siteid;
+        data.description = "Call Alert list (maintained via plugin)";
 
-        // need to 'set' the listBean - with name: search for -> cfset listBean.set(arguments.data)
-        arguments.listBean.set(data)
+        // 'set' the listBean to the one we are changing here
+        arguments.listBean.set(data);
 
-//WriteDump(arguments.listBean.getsiteid());
-//WriteDump(arguments.listBean.getMLID());
-//abort;
-
-        upload('replace', arguments.listBean, arguments.configBean, arguments.utility);
-
-        return "CSV file succesfully imported!";
+        // DO NOT EVEN FUCKING ASK - FOR 'arguments' here, read 'rc' !!!
+        if (upload( arguments.listBean
+                   ,arguments.configBean
+                   ,arguments.direction
+                   ,arguments.utility
+                   ,arguments.userfeed
+                   ,arguments.mailinglistManager
+                   ,arguments.siteid
+            )){
+            return "CSV file succesfully imported!";
+        }else{
+            return "Something went wrong again!";
+        }
     }
 </cfscript>
 
