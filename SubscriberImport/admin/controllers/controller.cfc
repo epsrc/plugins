@@ -55,8 +55,21 @@ component persistent="false" accessors="true" output="false" extends="mura.cfobj
         // GETINTERESTGROUPSITERATOR GETMEMBERSHIPSITERATOR GETMEMBERSITERATOR
         // WriteDump(rc.userManager.readByGroupName('X-Men',rc.siteid));
 
-        //WriteDump(rc.userManager.readByGroupName('X-Men',rc.siteid).GETMEMBERSITERATOR().getRecordCount());
-        //abort;
+        var umit = rc.userManager.readByGroupName('X-Men',rc.siteid).GETMEMBERSITERATOR();
+        if (umit.hasNext()){
+            // Loop over the records in the query.
+            var q = umit.getQuery();
+            for (
+                intRow = 1 ;
+                intRow LTE q.RecordCount ;
+                intRow = (intRow + 1)
+                )
+            {
+                WriteDump(q["Fname"][intRow] & " " & q["Lname"][intRow]);
+                //WriteDump(umit.next().getAllValues());
+            }
+        }
+        abort;
 
 		if ( rc.isFrontEndRequest ) {
 			location(url='#rc.$.globalConfig('context')#/', addtoken=false);
