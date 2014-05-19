@@ -64,34 +64,8 @@
                 <cfset data.company = '' />
             <cfcatch></cfcatch>
             </cftry>
-
+            <!--- CREATE THE MAILING LIST MEMBERSHIP --->
             <cfset arguments.mailinglistManager.createMember(data) />
-
-            <!--- and also create a site Member/User if he/she doesn't yet have an email listed in site members (users) --->
-	        <cfscript>
-	            // the iterator!
-                var local.userIterator = arguments.userManager.readByGroupName('Call Alert',arguments.siteid).GETMEMBERSITERATOR();
-	        </cfscript>
-
-	        <cfoutput>
-	            <cfif local.userIterator.hasNext()>
-	                <ul>
-	                    <cfloop condition="local.userIterator.hasNext()">
-	                        <cfset user = local.userIterator.next() />
-	                        <li>
-	                            #HTMLEditFormat(user.getValue('lname'))#, #HTMLEditFormat(user.getValue('fname'))#<br />
-	                            #HTMLEditFormat(user.getValue('someExtendedAttributeNameGoesHere'))#
-	                            <!--- <cfdump var="#user.getAllValues()#" /> --->
-	                        </li>
-	                    </cfloop>
-	                </ul>
-	            <cfelse>
-	                <div class="alert alert-info alert-dismissable">
-	                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-	                    <strong>Yo!</strong>No users belong to this Mailing Group yet!
-	                </div>
-	            </cfif>
-	        </cfoutput>
 
         <cfelseif  arguments.direction eq 'remove'>
             <cfquery>
@@ -102,10 +76,85 @@
         </cfif>
     </cfloop>
 
+    <!--- CREATE THE SITE USER (Member of a Member Group) if he/she doesn't yet have an email listed in site users --->
+    <cfscript>
+        var groupName = listBean.getName();
+        var groups = arguments.userManager.getUserGroups(arguments.siteid,1);
+        var getGroupID = new Query(sql = "SELECT UserID FROM groups WHERE groupname LIKE '" & groupName & "'",
+                                        dbtype = "query",
+                                        groups = groups
+                                        );
+        var groupID = getGroupID.execute().getResult();
+        <!--- TODO: test is this group exists yet? If not, create it --->
+
+        var userBean = arguments.userManager.getBean('user');
+
+        var q = arguments.mailinglistManager.getListMembers(local.MLID, arguments.siteid);
+        for (
+                intRow = 1 ;
+                intRow LTE q.RecordCount ;
+                intRow = (intRow + 1)
+             )
+        {
+            userBean.loadBy(email=q['email'][intRow]);
+            userBean.setSiteID(arguments.siteid);
+            userBean.setValue('email', q['email'][intRow] );
+            // without these you cannot find the user!
+            userBean.setValue('groupID', groupID.userid);
+            userBean.setValue('groupName', groupName);
+            // if username has been set already, do not overwrite these values
+            if (not Len(userBean.getValue('userName'))){
+                // without userName you cannot save the user, so use the email provided
+                userBean.setValue('userName', q['email'][intRow]);
+                // These are required on BE admin form, so best to set to some value (seems password can be left out though)
+                userBean.setValue('FName', 'Unknown');
+                userBean.setValue('LName', 'Unknown');
+            }
+            // these will vary according to preference and according to group the user is being created for
+            if (groupName eq 'Call Alert'){
+                if (not Len(userBean.getValue('subscribeCallAlert'))){
+                    userBean.setValue('subscribeCallAlert', 'Unsubscribe');
+                    userBean.setValue('subscribeCallAlertFrequency','');
+                }
+            }
+            // now save the user
+            userBean.save();
+        };
+
+        // Site Member's have to belong to a Member Group - we will make this the same as the Mailing List
+        // (or else it's almost impossible to find them again)
+        var local.userIterator = arguments.userManager.readByGroupName(groupName,
+                                                                       arguments.siteid).GETMEMBERSITERATOR()
+    </cfscript>
+
+    <!--- Output: List all <Mailing Group> users --->
+    <cfsavecontent variable="html">
+        <cfoutput>
+            <cfif local.userIterator.hasNext()>
+                <ul>
+                    <cfloop condition="local.userIterator.hasNext()">
+                        <cfset user = local.userIterator.next() />
+                        <li>
+                            #HTMLEditFormat(user.getValue('lname'))#, #HTMLEditFormat(user.getValue('fname'))#, #HTMLEditFormat(user.getValue('email'))# <br />
+                            #HTMLEditFormat(user.getValue('subscribeCallAlert'))#, #HTMLEditFormat(user.getValue('subscribeCallAlertFrequency'))#
+                            <!--- <cfdump var="#user.getAllValues()#" /> --->
+                        </li>
+                    </cfloop>
+                </ul>
+            <cfelse>
+                <div class="alert alert-info alert-dismissable">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">ABORT</button>
+                    <strong>Yo!</strong>No users belong to this Mailing Group and cannot be imported!
+                </div>
+            </cfif>
+        </cfoutput>
+    </cfsavecontent>
+
+    <!--- remove the temporary 'work' file --->
     <cffile ACTION="delete"
             file="#arguments.configBean.getTempDir()##cffile.serverfile#" >
 
-    <cfreturn true/>
+    <cfreturn html/>
 </cffunction>
 
 <cfscript>
@@ -113,9 +162,9 @@
         // So here we can write a CSV import routine ?
         var data = structNew();
 
-        // don't ask me why but fucking Mura can only cope with the args var being called arguments
-        // even though it would make more sense to call it rc because that's the fucking thing it passes in!!!
-        // Confusion + Obscura - what a winning combination!!!
+        // don't ask me why but Mura only copes with the args var being called arguments!
+        // even though it would make more sense to call it rc because that's the thing passed!
+        // Confusion + Obscura - what a winning combination!
 
         data.name = arguments.mailingListName;
         data.isPublic = "1";
@@ -126,17 +175,19 @@
         // 'set' the listBean to the one we are changing here - needs to be existing if already exists, otherwise a new one
         arguments.listBean.set(data);
 
-        // DO NOT EVEN FUCKING ASK - FOR 'arguments' here, read 'rc', i.e. what WAS already avaiable as rc. in controller and main .cfc's
-        // here has to be bastardised as 'arguments' - fuck's sake !!!
-        if (upload( arguments.listBean
-                   ,arguments.configBean
-                   ,arguments.direction
-                   ,arguments.utility
-                   ,arguments.userManager
-                   ,arguments.mailinglistManager
-                   ,arguments.siteid
-            )){
-            return "CSV file succesfully imported!";
+        // DO NOT EVEN ASK - FOR 'arguments' here, read 'rc', i.e. what WAS already avaiable as rc. in controller and main .cfc's
+        // here has to be bastardised as 'arguments' !!!
+        html = upload( arguments.listBean
+                       ,arguments.configBean
+                       ,arguments.direction
+                       ,arguments.utility
+                       ,arguments.userManager
+                       ,arguments.mailinglistManager
+                       ,arguments.siteid
+                      );
+
+        if (Len(html)){
+            return html;
         }else{
             return "Something went wrong again!";
         }

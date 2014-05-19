@@ -45,31 +45,8 @@ component persistent="false" accessors="true" output="false" extends="mura.cfobj
         rc.userFeed = rc.$.getServiceFactory().getBean('userFeed');
         rc.userFeed.setSiteID('MuraDevSite');
 
-        // UserFeed is all Memebers (as defined, Site, System, Privat, Public whatever)
-        //rc.userFeed.setGroupID('Call Alert', false);
-            //tusers.type=2 and tusers.isPublic =1 and
-            //tusers.siteid = 'MuraDevSite'
-        //WriteDump(rc.userFeed.getIterator().getQuery());
-
-        // User Manager:readByGroupName gets the 'group of members' record (not the members themselves) - so iterators of Interest Group, Member or Mebership
-        // GETINTERESTGROUPSITERATOR GETMEMBERSHIPSITERATOR GETMEMBERSITERATOR
-        // WriteDump(rc.userManager.readByGroupName('X-Men',rc.siteid));
-
-        var umit = rc.userManager.readByGroupName('X-Men',rc.siteid).GETMEMBERSITERATOR();
-        if (umit.hasNext()){
-            // Loop over the records in the query.
-            var q = umit.getQuery();
-            for (
-                intRow = 1 ;
-                intRow LTE q.RecordCount ;
-                intRow = (intRow + 1)
-                )
-            {
-                WriteDump(q["Fname"][intRow] & " " & q["Lname"][intRow]);
-                //WriteDump(umit.next().getAllValues());
-            }
-        }
-        abort;
+        // UserFeed is all Memebers (as defined, Site, System, Private, Public whatever)
+        // nb: we think private == Site (2), public == System (1)
 
 		if ( rc.isFrontEndRequest ) {
 			location(url='#rc.$.globalConfig('context')#/', addtoken=false);

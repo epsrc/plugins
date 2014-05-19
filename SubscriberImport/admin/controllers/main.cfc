@@ -49,7 +49,7 @@ component persistent="false" accessors="true" output="false" extends="controller
             // invoke IMPORT service here...
             variables.fw.service('importCSVFile.doImport', 'importServiceResult', rc);
         }else{
-            rc.importServiceResult = 'Something went wrong when trying to do an import based on what you entered!';
+            rc.importServiceResult = 'If you want to Import again, run through the menu option agian.';
         }
     }
 
