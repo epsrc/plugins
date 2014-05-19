@@ -41,7 +41,6 @@
     <cfif arguments.direction eq 'replace'>
         <cfset arguments.mailingListManager.deleteMembers(local.MLID, arguments.siteid) />
     </cfif>
-
     <cfloop list="#templist#" index="I" delimiters="|">
     <!--- I think this looked for email as first field
     <cfif REFindNoCase("^[^@%*<>' ]+@[^@%*<>' ]{1,255}\.[^@%*<>' ]{2,5}", trim(listFirst(i,chr(9)))) neq 0 >  --->
@@ -88,39 +87,46 @@
         <!--- TODO: test is this group exists yet? If not, create it --->
 
         var userBean = arguments.userManager.getBean('user');
+        userBean.setUserManager(arguments.userManager);
 
         var q = arguments.mailinglistManager.getListMembers(local.MLID, arguments.siteid);
+        WriteDump(q.RecordCount);
         for (
                 intRow = 1 ;
-                intRow LTE q.RecordCount ;
+                intRow LTE q.RecordCount;
                 intRow = (intRow + 1)
              )
-        {
-            userBean.loadBy(email=q['email'][intRow]);
-            userBean.setSiteID(arguments.siteid);
-            userBean.setValue('email', q['email'][intRow] );
-            // without these you cannot find the user!
-            userBean.setValue('groupID', groupID.userid);
-            userBean.setValue('groupName', groupName);
-            // if username has been set already, do not overwrite these values
-            if (not Len(userBean.getValue('userName'))){
+            {
+            //userBean.loadBy(email=q['email'][intRow]);
+            WriteDump(q['email'][intRow]);
+            //WriteDump(userBean.getAllValues());
+            //if (not Len(userBean.getValue('userName'))){
+                WriteDump('New User');
                 // without userName you cannot save the user, so use the email provided
-                userBean.setValue('userName', q['email'][intRow]);
+                userBean.setValue('userName', q['email'][intRow] );
+                userBean.setSiteID(arguments.siteid);
+                userBean.setValue('email', q['email'][intRow] );
+                // without these you cannot find the user!
+                userBean.setValue('groupID', groupID.userid);
+                userBean.setValue('groupName', groupName);
+
+                //userBean.setUsernameNoCache(q['email'][intRow]);
                 // These are required on BE admin form, so best to set to some value (seems password can be left out though)
                 userBean.setValue('FName', 'Unknown');
                 userBean.setValue('LName', 'Unknown');
-            }
-            // these will vary according to preference and according to group the user is being created for
-            if (groupName eq 'Call Alert'){
-                if (not Len(userBean.getValue('subscribeCallAlert'))){
-                    userBean.setValue('subscribeCallAlert', 'Unsubscribe');
-                    userBean.setValue('subscribeCallAlertFrequency','');
-                }
-            }
-            // now save the user
-            userBean.save();
-        };
+	            // these will vary according to preference and according to group the user is being created for
+	            if (groupName eq 'Call Alert'){
+	                if (not Len(userBean.getValue('subscribeCallAlert'))){
+	                    userBean.setValue('subscribeCallAlert', 'Unsubscribe');
+	                    userBean.setValue('subscribeCallAlertFrequency','');
+	                }
+	            }
+	            // now save the user
+	            userBean.save();
+            //}
+            };
 
+        abort;
         // Site Member's have to belong to a Member Group - we will make this the same as the Mailing List
         // (or else it's almost impossible to find them again)
         var local.userIterator = arguments.userManager.readByGroupName(groupName,
