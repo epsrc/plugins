@@ -15,8 +15,8 @@ http://www.apache.org/licenses/LICENSE-2.0
     <form action="#buildURL( 'main.doImport' )#" method="post" enctype="multipart/form-data">
 <!---
         <input type="text" name="sometext">
- --->
         <input type="submit" value="OK">
+ --->
     </form>
 <!---
     <cfdump var="#$#">

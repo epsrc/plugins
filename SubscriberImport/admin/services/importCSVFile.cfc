@@ -85,7 +85,7 @@
         userBean.setUserManager(arguments.userManager);
 
         var q = arguments.mailinglistManager.getListMembers(local.MLID, arguments.siteid);
-
+        WriteDump(q.recordCount);
         for (
                 intRow = 1 ;
                 intRow LTE q.RecordCount;
@@ -98,17 +98,10 @@
             if (arguments.direction eq 'remove'){
                 // Get rid of this User forever...
                 var userID = userBean.getValue('userID');
-
-                //WriteDump(username);
-                //WriteDump(userID);
-                //WriteDump(groupID);
-                //WriteDump(userBean.getAllValues());
-
                 userBean.removeGroupID(groupID);
                 userBean.delete();
                 arguments.userManager.deleteUserFromGroup(userID,  groupID);
                 arguments.userManager.delete(userID);
-
                 // Also remove from Mailing List
                 removeMLM = new Query();
                 removeMLM.setSQL("delete from tmailinglistmembers where email='#username#' and
@@ -116,37 +109,40 @@
                                   siteid='#arguments.SiteID#'
                                  ");
                 removeMLM.execute();
-                //WriteDump(removeMLM.getSQL());
-                //abort;
             }else{
-                if (not Len(userBean.getValue('userName'))){
-                    // without userName you cannot save the user, we  have to use the email provided
-                    userBean.setValue('userName', username);
-                    userBean.setSiteID(arguments.siteid);
-                    userBean.setValue('email', username);
-                    // without these you cannot find the user!
-                    userBean.setValue('groupID', groupID);
-                    userBean.setValue('groupName', groupName);
-                    // These are required on BE admin form, so best to set to some value (seems password can be left out though)
+                // WriteDump('WELCOME TO ORM');
+                // without userName you cannot save the user, we  have to use the email provided
+                userBean.setValue('userName', username);
+                userBean.setSiteID(arguments.siteid);
+                userBean.setValue('email', username);
+                // without these you cannot find the user!
+                userBean.setValue('groupID', groupID);
+                userBean.setValue('groupName', groupName);
+                // These are required on BE admin form, so best to set to some value (seems password can be left out though)
+                if (not Len(userBean.getValue('FName'))){
                     userBean.setValue('FName', 'Unknown');
-                    userBean.setValue('LName', 'Unknown');
-                    // these will vary according to preference and according to group the user is being created for
-                    if (groupName eq 'Call Alert'){
-                        if (not Len(userBean.getValue('subscribeCallAlert'))){
-                            if (q['isVerified'][intRow] eq '1'){
-                                subscribe='Subscribe';
-                            }else{
-                                subscribe='Unsubscribe';
-                            }
-                            userBean.setValue('subscribeCallAlert', subscribe);
-                            userBean.setValue('subscribeCallAlertFrequency', '');
-                        }
-                    }
-                    // only now save the user
-                    userBean.save();
                 }
+                if (not Len(userBean.getValue('LName'))){
+                    userBean.setValue('LName', 'Unknown');
+                }
+                // these will vary according to preference and according to group the user is being created for
+                if (groupName eq 'Call Alert'){
+                    if (not Len(userBean.getValue('subscribeCallAlert'))){
+                        if (q['isVerified'][intRow] eq '1'){
+                            subscribe='Subscribe';
+                        }else{
+                            subscribe='Unsubscribe';
+                        }
+                        userBean.setValue('subscribeCallAlert', subscribe);
+                        userBean.setValue('subscribeCallAlertFrequency', '');
+                    }
+                }
+                // only now save the user
+                userBean.save();
+                userManager.update(userBean.getAllValues(), true);
             }
         }
+        //abort;
     </cfscript>
 
     <!--- IF WE ARE REMOVING --->
@@ -161,9 +157,9 @@
     <!--- Site Users are Member's have that belong to a Member Group - this group must be the same name as the Mailing List
         // (or else it's almost impossible to find them again) --->
     <cfset local.userIterator = arguments.userManager.readByGroupName(groupName,
-                                                                       arguments.siteid).GETMEMBERSITERATOR() />
+                                                                      arguments.siteid).GETMEMBERSITERATOR() />
 
-    <!--- Output: List all <Mailing Group> users --->
+    <!--- Output/Result: THIS LISTS ALL <Mailing Group> USERS/MEMBERS --->
     <cfsavecontent variable="html">
         <cfoutput>
             <cfif local.userIterator.hasNext()>
@@ -179,7 +175,7 @@
                 </ul>
             <cfelse>
                 <div class="alert alert-info alert-dismissable">
-                    <strong>#groupName#!</strong> This Mailing List Group has no Users
+                    <strong>#groupName#!</strong> This Mailing List Group has no Users!
                 </div>
             </cfif>
         </cfoutput>
