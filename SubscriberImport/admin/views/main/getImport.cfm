@@ -44,9 +44,6 @@ http://www.apache.org/licenses/LICENSE-2.0
             <label for="dm" class="radio inline">
                 <input type="radio" name="direction" id="dm" value="remove">Remove from List (if found)
             </label>
-            <label for="dp" class="radio inline">
-                <input type="radio" name="direction" id="dp" value="replace">Replace all (recreate list)
-            </label>
             </div>
         </div>
 

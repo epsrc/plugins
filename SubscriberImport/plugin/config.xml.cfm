@@ -9,11 +9,11 @@ http://www.apache.org/licenses/LICENSE-2.0
 --->
 <cfinclude template="../includes/fw1config.cfm" />
 <cfoutput><plugin>
-	<name>#variables.framework.package#</name>
+	<name>Subscriber Import</name>
 	<package>#variables.framework.package#</package>
 	<directoryFormat>packageOnly</directoryFormat>
-	<provider>Steve Withington</provider>
-	<providerURL>http://stephenwithington.com</providerURL>
+	<provider>Bill Tudor</provider>
+	<providerURL>http://epsrc.ac.uk</providerURL>
 	<loadPriority>5</loadPriority>
 	<version>#variables.framework.packageVersion#</version>
 	<category>Application</category>

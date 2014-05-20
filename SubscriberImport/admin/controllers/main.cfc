@@ -18,10 +18,6 @@ component persistent="false" accessors="true" output="false" extends="controller
     public any function doImport(required rc){
         if (isDefined("rc.mailingListName")){
 
-            //WriteDump(rc.userFeed.getAllValues());
-            //WriteDump(rc.listBean);
-            //abort;
-
             // rc
             // arguments                 1 Empty:null
             // LISTBEAN                  2 Component (mura.mailinglist.mailinglistBean)

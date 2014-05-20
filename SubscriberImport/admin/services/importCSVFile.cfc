@@ -42,15 +42,16 @@
         <cfset arguments.mailingListManager.deleteMembers(local.MLID, arguments.siteid) />
     </cfif>
     <cfloop list="#templist#" index="I" delimiters="|">
-    <!--- I think this looked for email as first field
+    <!--- This checked that a valid email was first field
     <cfif REFindNoCase("^[^@%*<>' ]+@[^@%*<>' ]{1,255}\.[^@%*<>' ]{2,5}", trim(listFirst(i,chr(9)))) neq 0 >  --->
     <cfset I = arguments.utility.listFix(I,chr(44),"_null_")>
+
+        <cfset ID = listgetat(I,1,chr(44))/>
+        <cfset var email = listgetat(I,2,chr(44))/>
+        <cfset var active = listgetat(I,3,chr(44))/>
+
         <cfif ((arguments.direction eq 'add') OR (arguments.direction eq 'replace')) AND
                (UCASE(listFirst(I,chr(44)) neq "ID") AND UCASE(listFirst(I,chr(9)) neq "EMAIL")) >
-
-            <cfset ID = listgetat(I,1,chr(44))/>
-            <cfset var email = listgetat(I,2,chr(44))/>
-            <cfset var active = listgetat(I,3,chr(44))/>
 
             <cftry>
                 <cfset data = structNew()>
@@ -63,19 +64,13 @@
                 <cfset data.company = '' />
             <cfcatch></cfcatch>
             </cftry>
-            <!--- CREATE THE MAILING LIST MEMBERSHIP --->
-            <cfset arguments.mailinglistManager.createMember(data) />
 
-        <cfelseif  arguments.direction eq 'remove'>
-            <cfquery>
-            delete from tmailinglistmembers where email=<cfqueryparam cfsqltype="cf_sql_varchar" value="#email#" /> and
-                        mlid=<cfqueryparam cfsqltype="cf_sql_varchar" value="#local.MLID()#" /> and
-                        siteid=<cfqueryparam cfsqltype="cf_sql_varchar" value="#arguments.SiteID#" />
-            </cfquery>
+            <!--- CREATE THE MAILING LIST MEMBERSHIP FROM FILE DATA --->
+            <cfset arguments.mailinglistManager.createMember(data) />
         </cfif>
     </cfloop>
 
-    <!--- CREATE THE SITE USER (Member of a Member Group) if he/she doesn't yet have an email listed in site users --->
+    <!--- SITE USERS (MEMBERS of a Member Group) if he/she doesn't yet have an email listed in site users --->
     <cfscript>
         var groupName = listBean.getName();
         var groups = arguments.userManager.getUserGroups(arguments.siteid,1);
@@ -83,55 +78,90 @@
                                         dbtype = "query",
                                         groups = groups
                                         );
-        var groupID = getGroupID.execute().getResult();
-        <!--- TODO: test is this group exists yet? If not, create it --->
+        var groupID = getGroupID.execute().getResult().userID;
+        <!--- TODO: test if this group exists yet? If not, create it --->
 
         var userBean = arguments.userManager.getBean('user');
         userBean.setUserManager(arguments.userManager);
 
         var q = arguments.mailinglistManager.getListMembers(local.MLID, arguments.siteid);
-        WriteDump(q.RecordCount);
+
         for (
                 intRow = 1 ;
                 intRow LTE q.RecordCount;
                 intRow = (intRow + 1)
              )
             {
-            //userBean.loadBy(email=q['email'][intRow]);
-            WriteDump(q['email'][intRow]);
-            //WriteDump(userBean.getAllValues());
-            //if (not Len(userBean.getValue('userName'))){
-                WriteDump('New User');
-                // without userName you cannot save the user, so use the email provided
-                userBean.setValue('userName', q['email'][intRow] );
-                userBean.setSiteID(arguments.siteid);
-                userBean.setValue('email', q['email'][intRow] );
-                // without these you cannot find the user!
-                userBean.setValue('groupID', groupID.userid);
-                userBean.setValue('groupName', groupName);
+            var username=q['email'][intRow];
+            userBean.loadBy(userName=username);
 
-                //userBean.setUsernameNoCache(q['email'][intRow]);
-                // These are required on BE admin form, so best to set to some value (seems password can be left out though)
-                userBean.setValue('FName', 'Unknown');
-                userBean.setValue('LName', 'Unknown');
-	            // these will vary according to preference and according to group the user is being created for
-	            if (groupName eq 'Call Alert'){
-	                if (not Len(userBean.getValue('subscribeCallAlert'))){
-	                    userBean.setValue('subscribeCallAlert', 'Unsubscribe');
-	                    userBean.setValue('subscribeCallAlertFrequency','');
-	                }
-	            }
-	            // now save the user
-	            userBean.save();
-            //}
-            };
+            if (arguments.direction eq 'remove'){
+                // Get rid of this User forever...
+                var userID = userBean.getValue('userID');
 
-        abort;
-        // Site Member's have to belong to a Member Group - we will make this the same as the Mailing List
-        // (or else it's almost impossible to find them again)
-        var local.userIterator = arguments.userManager.readByGroupName(groupName,
-                                                                       arguments.siteid).GETMEMBERSITERATOR()
+                //WriteDump(username);
+                //WriteDump(userID);
+                //WriteDump(groupID);
+                //WriteDump(userBean.getAllValues());
+
+                userBean.removeGroupID(groupID);
+                userBean.delete();
+                arguments.userManager.deleteUserFromGroup(userID,  groupID);
+                arguments.userManager.delete(userID);
+
+                // Also remove from Mailing List
+                removeMLM = new Query();
+                removeMLM.setSQL("delete from tmailinglistmembers where email='#username#' and
+                                  mlid='#local.MLID#' and
+                                  siteid='#arguments.SiteID#'
+                                 ");
+                removeMLM.execute();
+                //WriteDump(removeMLM.getSQL());
+                //abort;
+            }else{
+                if (not Len(userBean.getValue('userName'))){
+                    // without userName you cannot save the user, we  have to use the email provided
+                    userBean.setValue('userName', username);
+                    userBean.setSiteID(arguments.siteid);
+                    userBean.setValue('email', username);
+                    // without these you cannot find the user!
+                    userBean.setValue('groupID', groupID);
+                    userBean.setValue('groupName', groupName);
+                    // These are required on BE admin form, so best to set to some value (seems password can be left out though)
+                    userBean.setValue('FName', 'Unknown');
+                    userBean.setValue('LName', 'Unknown');
+                    // these will vary according to preference and according to group the user is being created for
+                    if (groupName eq 'Call Alert'){
+                        if (not Len(userBean.getValue('subscribeCallAlert'))){
+                            if (q['isVerified'][intRow] eq '1'){
+                                subscribe='Subscribe';
+                            }else{
+                                subscribe='Unsubscribe';
+                            }
+                            userBean.setValue('subscribeCallAlert', subscribe);
+                            userBean.setValue('subscribeCallAlertFrequency', '');
+                        }
+                    }
+                    // only now save the user
+                    userBean.save();
+                }
+            }
+        }
     </cfscript>
+
+    <!--- IF WE ARE REMOVING --->
+    <cfif  arguments.direction eq 'remove'>
+        <cfquery>
+        delete from tmailinglistmembers where email=<cfqueryparam cfsqltype="cf_sql_varchar" value="#email#" /> and
+                    mlid=<cfqueryparam cfsqltype="cf_sql_varchar" value="#local.MLID#" /> and
+                    siteid=<cfqueryparam cfsqltype="cf_sql_varchar" value="#arguments.SiteID#" />
+        </cfquery>
+    </cfif>
+
+    <!--- Site Users are Member's have that belong to a Member Group - this group must be the same name as the Mailing List
+        // (or else it's almost impossible to find them again) --->
+    <cfset local.userIterator = arguments.userManager.readByGroupName(groupName,
+                                                                       arguments.siteid).GETMEMBERSITERATOR() />
 
     <!--- Output: List all <Mailing Group> users --->
     <cfsavecontent variable="html">
@@ -149,8 +179,7 @@
                 </ul>
             <cfelse>
                 <div class="alert alert-info alert-dismissable">
-                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">ABORT</button>
-                    <strong>Yo!</strong>No users belong to this Mailing Group and cannot be imported!
+                    <strong>#groupName#!</strong> This Mailing List Group has no Users
                 </div>
             </cfif>
         </cfoutput>
