@@ -17,8 +17,8 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 <div class="row-fluid">
 <div class="span12">
-	<h1>Mailing list import of Members</h1>
-    <p>Create Site Members (users) with subscription to specified mailing list</p>
+	<h1>Mailing List Subscribers</h1>
+    <p>Add/Remove Subscribers (public site users that are Members of and Subscribe to the chosen mailing list)</p>
     <form name="importmaillist" id="importmaillist" method="post" action="#buildURL( 'main.doImport' )#" enctype="multipart/form-data">
 <div class="tabbable tabs-left mura-ui">
 <div class="tab-content">
