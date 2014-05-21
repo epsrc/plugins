@@ -110,7 +110,9 @@
                                  ");
                 removeMLM.execute();
             }else{
-                // WriteDump('WELCOME TO ORM');
+                WriteDump('WELCOME TO ORM');
+                WriteDump(not len(userBean.getValue('subscribeCallAlert')));
+                WriteDump(q['isVerified'][intRow] eq 1);
                 // without userName you cannot save the user, we  have to use the email provided
                 userBean.setValue('userName', username);
                 userBean.setSiteID(arguments.siteid);
@@ -127,14 +129,19 @@
                 }
                 // these will vary according to preference and according to group the user is being created for
                 if (groupName eq 'Call Alert'){
-                    if (not Len(userBean.getValue('subscribeCallAlert'))){
-                        if (q['isVerified'][intRow] eq '1'){
+                    if (userBean.getValue('subscribeCallAlert') eq 'Unsubscribe'){
+                        if (q['isVerified'][intRow] eq 1){
                             subscribe='Subscribe';
+                            if (not Len(userBean.getValue('subscribeCallAlertFrequency'))){
+                                // default value - User can change this later via Edit Profile form
+                                frequency='Instant';
+                            }
                         }else{
                             subscribe='Unsubscribe';
+                            frequency='';
                         }
                         userBean.setValue('subscribeCallAlert', subscribe);
-                        userBean.setValue('subscribeCallAlertFrequency', '');
+                        userBean.setValue('subscribeCallAlertFrequency', frequency);
                     }
                 }
                 // only now save the user
@@ -142,7 +149,7 @@
                 userManager.update(userBean.getAllValues(), true);
             }
         }
-        //abort;
+        abort;
     </cfscript>
 
     <!--- IF WE ARE REMOVING --->
