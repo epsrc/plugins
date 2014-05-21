@@ -24,4 +24,8 @@ http://www.apache.org/licenses/LICENSE-2.0
     <p>
     Due to Mura limitations we have to use the subscribers <strong>email address</strong> as the 'username'.
     </p>
+    <div class="alert alert-info alert-dismissable"><p>
+        BEFORE RUNNING ANY IMPORT IT IS ESSENTIAL THAT YOU SET UP A SITE MEMBER USER GROUP WITH EXACTLY THE SAME NAME AS THE MAILING LIST -
+        IN EPSRC'S (INITIAL) CASE THIS IS <STRONG>'CALL ALERT'<STRONG>.
+    </p></div>
 </cfoutput>

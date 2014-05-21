@@ -70,7 +70,7 @@
         </cfif>
     </cfloop>
 
-    <!--- SITE USERS (MEMBERS of a Member Group) if he/she doesn't yet have an email listed in site users --->
+    <!--- SITE USERS (MEMBERS of a Member GROUP) if he/she doesn't yet have an email listed in site users --->
     <cfscript>
         var groupName = listBean.getName();
         var groups = arguments.userManager.getUserGroups(arguments.siteid,1);
