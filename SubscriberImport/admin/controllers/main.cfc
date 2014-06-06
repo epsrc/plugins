@@ -9,11 +9,11 @@ http://www.apache.org/licenses/LICENSE-2.0
 */
 component persistent="false" accessors="true" output="false" extends="controller" {
 
-	// *********************************  PAGES  *******************************************
+    // *********************************  PAGES  *******************************************
 
-	public any function default(required rc) {
-		rc.default = 'whatever';
-	}
+    public any function default(required rc) {
+        rc.default = 'whatever';
+    }
 
     public any function doImport(required rc){
         if (isDefined("rc.mailingListName")){
@@ -49,4 +49,115 @@ component persistent="false" accessors="true" output="false" extends="controller
         }
     }
 
+    public any function runMailshot(required rc) {
+
+        var callAlertInstantText = '<p>Here is a summary of the call</p>';
+        var mailer = application.serviceFactory.getBean('mailer');
+        var manager = application.serviceFactory.getBean('emailManager');
+        var datasource="#manager.getconfigBean().getReadOnlyDatasource()#";
+        var username="#manager.getconfigBean().getReadOnlyDbUsername()#";
+        var password="#manager.getconfigBean().getReadOnlyDbPassword()#";
+        var image = "";
+        var issueDate = "";
+        var callOpenDate = "";
+        var callClosingDate = "";
+        var callClosingTime = "";
+        var relatedTheme = "";
+        var callType = "";
+        var subject = "";
+
+        <!--- With this Group Member GUID, should be able to get a list of all the active Members who are
+        subscribed to the Instant Call Alert list --->
+        var siteID = $.event('siteid');
+        var userManager = $.getBean('userManager');
+        var groups = userManager.getPublicGroups(siteID);
+        var qGroupID = new Query(sql = "SELECT userID,Email FROM groups WHERE groupname LIKE 'Call Alert'",
+                                 dbtype = "query",
+                                 groups = groups
+                                );
+
+        // irritating that Mura uses userID when it means groupID...!
+
+        var groupID = qGroupID.execute().getResult().userID;
+        var groupEmail = qGroupID.execute().getResult().Email;
+        var qMembers = $.getBean('userManager').readGroupMemberships(groupID);
+        <!---
+            <cfdump var="#groups#">
+            <cfdump var="#qMembers#">
+        --->
+        var cnt = 0;
+
+        // TODO: need to get the feed (RSS content collection called 'Call Alert') as this will have the
+        // fields and the iterator...
+
+        var flds = ListToArray(feed.fields);
+
+        while ((feed.iterator.hasNext()) and (cnt LT 1)) {
+            <!--- each Call in the feed --->
+            var item = feed.iterator.next();
+
+            <!--- These are all the fields; we may need to 'loop' these to perform substitution within in
+                  template text placeholders e.g. {{title}} --->
+            subject = "Instant Call Alert - ";
+            for (i=1; i LTE ArrayLen(flds); i++){
+                    switch(flds[i]) {
+                        case "Title":
+                            subject &= item.getValue(i);
+                            break;
+                        case "Image":
+                            image = item.getValue(i);
+                            break;
+                        case "issueDate":
+                            issueDate = item.getValue(i);
+                        case "callOpenDate":
+                            callOpenDate = item.getValue(i);
+                            break;
+                        case "callClosingDate":
+                            callClosingDate = item.getValue(i);
+                            break;
+                        case "callClosingTime":
+                            callClosingTime = item.getValue(i);
+                            break;
+                        case "relatedTheme":
+                            relatedTheme = item.getValue(i);
+                            break;
+                        case "callType":
+                            callType = item.getValue(i);
+                            break;
+                        case "Summary":
+                            callAlertInstantText &= item.getValue(i);
+                            break;
+                }
+            }
+            <!--- TODO: could use an email template to personalise this call alert email and use more fields --->
+
+            <!--- loop for all active subscribed members --->
+            for (intRow = 1; intRow LTE qMembers.RecordCount; intRow++){
+
+                if (qMembers["inActive"][intRow] eq 0 and qMembers["subscribe"][intRow] eq 1){
+
+                        // needed a user bean to get the call alert subscribe status
+                        var userBean = userManager.getBean('user');
+                        userBean.setSiteID(siteID);
+                        userBean.loadBy(userName=qMembers["email"][intRow]);
+                        <!--- the field 'qMembers.subscribe' really means 'use Mura email broadcaster'
+                              the class extension here is what thw user themselves sets in their preferences
+                              So we could also use the frequency preference here as well --->
+                        if ( userBean.getValue('subscribeCallAlert') eq 'Subscribe' ){
+                            <!--- NB: THIS CAN POTENTIALLY SEND 100's of emails !!! --->
+                            mailer.sendTextAndHTML( callAlertInstantText
+                                                   ,callAlertInstantText
+                                                   ,userBean.getValue('email')
+                                                   ,groupEmail
+                                                   ,subject
+                                                   ,siteID
+                                                  );
+                        }
+                }
+
+            } // for each member
+
+        } // for each call in the feed
+
+    } // runMailshot
 }
