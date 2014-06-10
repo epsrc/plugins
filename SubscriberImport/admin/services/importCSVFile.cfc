@@ -67,6 +67,7 @@
 
             <!--- CREATE THE MAILING LIST MEMBERSHIP FROM FILE DATA --->
             <cfset arguments.mailinglistManager.createMember(data) />
+            <cfset sleep(1000) />
         </cfif>
     </cfloop>
 
@@ -79,11 +80,8 @@
                                         groups = groups
                                         );
         var groupID = getGroupID.execute().getResult().userID;
+
         <!--- TODO: test if this group exists yet? If not, create it --->
-
-        var userBean = arguments.userManager.getBean('user');
-        userBean.setUserManager(arguments.userManager);
-
         var q = arguments.mailinglistManager.getListMembers(local.MLID, arguments.siteid);
         for (
                 intRow = 1 ;
@@ -91,6 +89,10 @@
                 intRow = (intRow + 1)
              )
             {
+            var userBean = arguments.userManager.getBean('user');
+            userBean.setUserManager(arguments.userManager);
+            userBean.setSiteID(arguments.siteid);
+
             var username=q['email'][intRow];
             userBean.loadBy(userName=username);
 
@@ -111,7 +113,6 @@
             }else{
                 // without userName you cannot save the user, we  have to use the email provided
                 userBean.setValue('userName', username);
-                userBean.setSiteID(arguments.siteid);
                 userBean.setValue('email', username);
                 // without these you cannot find the user!
                 userBean.setValue('groupID', groupID);
@@ -144,6 +145,7 @@
                 userBean.save();
                 userManager.update(userBean.getAllValues(), true);
             }
+            sleep(1000);
         }
         abort;
     </cfscript>
