@@ -17,7 +17,7 @@
         <div class="control-group">
             <label class="control-label">Mail Shot</label>
             <div class="controls">
-            <select name="mailshottype" onchange="">
+            <select name="mailshottype" id="mailshottype" onchange="">
                 <option value="Instant Call Alert" selected>Instant Call Alert</option>
                 <option value="Weekly Call Alert" >Weekly Call Alert</option>
                 <option value="Monthly Call Alert" >Monthly Call Alert</option>
@@ -26,10 +26,28 @@
         </div>
 
         <div class="control-group">
+            <label class="control-label">RSS Feed Name to use</label>
+            <div class="controls">
+                <label for="feedname" class="">
+                    <input type="text" name="feedname" id="feedname" value="Call Alert">
+                </label>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label class="control-label">Call Mura ID to use</label>
+            <div class="controls">
+                <label for="callid" class="">
+                    <input type="text" name="callid" id="callid" value="Call Alert">
+                </label>
+            </div>
+        </div>
+
+        <div class="control-group">
             <label class="control-label">Limit batches to:</label>
             <div class="controls">
-	            <label for="batchlimit" class="radio inline">
-	                <input type="text" name="batchlimit" id="batchlimit" value="500">
+	            <label for="batchlimit" class="">
+	                <input type="text" name="batchlimit" id="batchlimit" value="100">
 	            </label>
             </div>
         </div>
