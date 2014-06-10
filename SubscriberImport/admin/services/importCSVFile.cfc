@@ -85,7 +85,6 @@
         userBean.setUserManager(arguments.userManager);
 
         var q = arguments.mailinglistManager.getListMembers(local.MLID, arguments.siteid);
-        WriteDump(q.recordCount);
         for (
                 intRow = 1 ;
                 intRow LTE q.RecordCount;
@@ -110,9 +109,6 @@
                                  ");
                 removeMLM.execute();
             }else{
-                WriteDump('WELCOME TO ORM');
-                WriteDump(not len(userBean.getValue('subscribeCallAlert')));
-                WriteDump(q['isVerified'][intRow] eq 1);
                 // without userName you cannot save the user, we  have to use the email provided
                 userBean.setValue('userName', username);
                 userBean.setSiteID(arguments.siteid);
