@@ -144,7 +144,7 @@ component persistent="false" accessors="true" output="false" extends="controller
                         <!--- the field 'qMembers.subscribe' really means 'use Mura email broadcaster'
                               the class extension here is what thw user themselves sets in their preferences
                               So we could also use the frequency preference here as well --->
-                        if ( userBean.getValue('subscribeCallAlert') eq 'Subscribe' ){
+                        if ( userBean.getValue('subscribeCallAlert') eq 'Subscriber' ){
                             <!--- NB: THIS CAN POTENTIALLY SEND 100's of emails !!! --->
                             mailer.sendTextAndHTML( callAlertInstantText
                                                    ,callAlertInstantText
