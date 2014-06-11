@@ -17,6 +17,9 @@
     <cfargument name="mailingListManager" type="any" />
     <cfargument name="siteid" type="string" />
 
+    <!--- No.of seconds:  14400 = 4hrs --->
+    <cfsetting requestTimeout = "14400">
+
     <cfset var templist = "" />
     <cfset var fieldlist = "" />
     <cfset var data = "">
@@ -67,7 +70,7 @@
 
             <!--- CREATE THE MAILING LIST MEMBERSHIP FROM FILE DATA --->
             <cfset arguments.mailinglistManager.createMember(data) />
-            <cfset sleep(1000) />
+            <cfset sleep(200) />
         </cfif>
     </cfloop>
 
@@ -145,7 +148,7 @@
                 userBean.save();
                 userManager.update(userBean.getAllValues(), true);
             }
-            sleep(1000);
+            sleep(200);
         }
         abort;
     </cfscript>
