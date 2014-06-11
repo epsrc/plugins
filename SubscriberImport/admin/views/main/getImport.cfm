@@ -48,6 +48,21 @@ http://www.apache.org/licenses/LICENSE-2.0
         </div>
 
         <div class="control-group">
+            <label class="control-label">MailingList or Users</label>
+            <div class="controls">
+            <label for="ml" class="radio inline">
+                <input type="radio" name="ML_Users" id="ml" value="ML" checked>Mailing List Member update
+            </label>
+            <label for="us" class="radio inline">
+                <input type="radio" name="ML_Users" id="us" value="Users" >Users update
+            </label>
+            <label for="us" class="radio inline">
+                <input type="radio" name="ML_Users" id="us" value="ShowOnly">Show Users only
+            </label>
+            </div>
+        </div>
+
+        <div class="control-group">
             <label class="control-label">
             #application.rbFactory.getKeyValue(session.rb,'mailinglistmanager.uploademailaddressfile')#
             </label>
@@ -55,6 +70,7 @@ http://www.apache.org/licenses/LICENSE-2.0
                 <input type="file" name="listfile" id="listfile" accept="text/plain" >
             </div>
         </div>
+
         <div class="form-actions">
             <input type="submit" value="Import" class="btn">
         </div>
