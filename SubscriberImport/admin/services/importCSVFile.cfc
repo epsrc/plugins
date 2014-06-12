@@ -17,6 +17,7 @@
     <cfargument name="mailingListManager" type="any" />
     <cfargument name="siteid" type="string" />
     <cfargument name="ML_Users" type="string" />
+    <cfargument name="mailer" type="any" />
 
     <!--- No.of seconds:  14400 = 4hrs --->
     <cfsetting requestTimeout = "14400">
@@ -89,11 +90,12 @@
         <cfscript>
 
             var groups = arguments.userManager.getUserGroups(arguments.siteid,1);
-            var getGroupID = new Query(sql = "SELECT UserID FROM groups WHERE groupname LIKE '" & groupName & "'",
+            var getGroupID = new Query(sql = "SELECT UserID,Email FROM groups WHERE groupname LIKE '" & groupName & "'",
                                             dbtype = "query",
                                             groups = groups
                                             );
             var groupID = getGroupID.execute().getResult().userID;
+            var groupemail = getGroupID.execute().getResult().eMail;
 
             <!--- TODO: test if this group exists yet? If not, create it --->
             var q = arguments.mailinglistManager.getListMembers(local.MLID, arguments.siteid);
@@ -129,10 +131,13 @@
                     // without userName you cannot save the user, we  have to use the email provided
                     userBean.setValue('userName', username);
                     userBean.setValue('email', username);
+                    // TODO: send an email saying that you are in a new system and your password has been reset
+                    // and maybe flag user as InActive until they have responded via the link in the 'Welcome' email
+                    userBean.setValue('password','Welcome123');
                     // without these you cannot find the user!
                     userBean.setValue('groupID', groupID);
                     userBean.setValue('groupName', groupName);
-                    // These are required on BE admin form, so best to set to some value (seems password can be left out though)
+                    // These are required on BE admin form, so best to set to some value
                     if (not Len(userBean.getValue('FName'))){
                         userBean.setValue('FName', 'Unknown');
                     }
@@ -159,6 +164,9 @@
                     // only now save the user
                     userBean.save();
                     userManager.update(userBean.getAllValues(), true);
+
+                    // Let them know they are in the new system and ask for verification via email
+                    sendWelcomeMail(userBean, arguments.mailer, groupEmail, arguments.siteid);
                 }
                 sleep(100);
             }
@@ -245,6 +253,20 @@
             return "Something went wrong again!";
         }
     }
+
+    public string function sendWelcomeEMail(userBean, mailer, groupEmail, siteID){
+
+        var welcomeText = "Blah, blah, blah";
+        // needed a user bean to get the call alert subscribe status
+        mailer.sendTextAndHTML( welcomeText
+                               ,welcomeText
+                               ,userBean.getValue('email')
+                               ,groupEmail
+                               ,'Call Alert subscriber - Welcome to the new EPSRC website'
+                               ,siteID
+                              );
+    }
+
 </cfscript>
 
 </cfcomponent>

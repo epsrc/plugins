@@ -77,9 +77,7 @@ component persistent="false" accessors="true" output="false" extends="controller
                                      dbtype = "query",
                                      groups = groups
                                     );
-
             // irritating that Mura uses userID when it means groupID...!
-
             var groupID = qGroupID.execute().getResult().userID;
             var groupEmail = qGroupID.execute().getResult().Email;
             var qMembers = $.getBean('userManager').readGroupMemberships(groupID);
