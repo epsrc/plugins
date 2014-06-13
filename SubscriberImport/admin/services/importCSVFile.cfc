@@ -39,16 +39,16 @@
  --->
     <cfset groupName = listBean.getName() />
 
-    <cffile ACTION="upload"
-            destination="#arguments.configBean.getTempDir()#"
-            filefield="listfile"
-            nameconflict="makeunique" >
-    <!--- cffile.serverfile is 'set' by cffile action above --->
-    <cffile file="#arguments.configBean.getTempDir()##cffile.serverFile#"
-            variable="tempList"
-            action="read" >
-
     <cfif (arguments.ML_Users eq "ML")>
+
+	    <cffile ACTION="upload"
+	            destination="#arguments.configBean.getTempDir()#"
+	            filefield="listfile"
+	            nameconflict="makeunique" >
+	    <!--- cffile.serverfile is 'set' by cffile action above --->
+	    <cffile file="#arguments.configBean.getTempDir()##cffile.serverFile#"
+	            variable="tempList"
+	            action="read" >
 
         <cfset tempList = "#reReplace(tempList,"(#chr(13)##chr(10)#|#chr(10)#|#chr(13)#)|\n|(\r\n)","|","all")#">
         <cfif arguments.direction eq 'replace'>
@@ -70,7 +70,7 @@
                     <cfset data = structNew()>
                     <cfset data.mlid = local.MLID />
                     <cfset data.siteid = arguments.siteid />
-                    <cfset data.isVerified = active />
+                    <cfset data.isVerified = 1 />
                     <cfset data.email = email />
                     <cfset data.fname = '' />
                     <cfset data.lname = '' />
@@ -88,14 +88,14 @@
     <cfif (arguments.ML_Users eq "Users")>
         <!--- SITE USERS (MEMBERS of a Member GROUP) if he/she doesn't yet have an email listed in site users --->
         <cfscript>
-
             var groups = arguments.userManager.getUserGroups(arguments.siteid,1);
             var getGroupID = new Query(sql = "SELECT UserID,Email FROM groups WHERE groupname LIKE '" & groupName & "'",
                                             dbtype = "query",
                                             groups = groups
-                                            );
+                                      );
             var groupID = getGroupID.execute().getResult().userID;
             var groupemail = getGroupID.execute().getResult().eMail;
+            var password = 'Welcome123';
 
             <!--- TODO: test if this group exists yet? If not, create it --->
             var q = arguments.mailinglistManager.getListMembers(local.MLID, arguments.siteid);
@@ -133,7 +133,7 @@
                     userBean.setValue('email', username);
                     // TODO: send an email saying that you are in a new system and your password has been reset
                     // and maybe flag user as InActive until they have responded via the link in the 'Welcome' email
-                    userBean.setValue('password','Welcome123');
+                    userBean.setValue('password', password);
                     // without these you cannot find the user!
                     userBean.setValue('groupID', groupID);
                     userBean.setValue('groupName', groupName);
@@ -166,21 +166,22 @@
                     userManager.update(userBean.getAllValues(), true);
 
                     // Let them know they are in the new system and ask for verification via email
-                    sendWelcomeMail(userBean, arguments.mailer, groupEmail, arguments.siteid);
+                    sendWelcomeMail(userBean, arguments.mailer, groupEmail, arguments.siteid, password);
                 }
                 sleep(100);
             }
         </cfscript>
     </cfif>
     <!--- IF WE ARE REMOVING --->
-    <cfif  arguments.direction eq 'remove'>
-        <cfquery>
-        delete from tmailinglistmembers where email=<cfqueryparam cfsqltype="cf_sql_varchar" value="#email#" /> and
-                    mlid=<cfqueryparam cfsqltype="cf_sql_varchar" value="#local.MLID#" /> and
-                    siteid=<cfqueryparam cfsqltype="cf_sql_varchar" value="#arguments.SiteID#" />
-        </cfquery>
+    <cfif (arguments.ML_Users eq "ML")>
+	    <cfif  arguments.direction eq 'remove'>
+	        <cfquery>
+	        delete from tmailinglistmembers where email=<cfqueryparam cfsqltype="cf_sql_varchar" value="#email#" /> and
+	                    mlid=<cfqueryparam cfsqltype="cf_sql_varchar" value="#local.MLID#" /> and
+	                    siteid=<cfqueryparam cfsqltype="cf_sql_varchar" value="#arguments.SiteID#" />
+	        </cfquery>
+	    </cfif>
     </cfif>
-
     <!--- Site Users are Member's have that belong to a Member Group - this group must be the same name as the Mailing List
         // (or else it's almost impossible to find them again) --->
     <cfset local.userIterator = arguments.userManager.readByGroupName(groupName,
@@ -210,9 +211,11 @@
         </cfoutput>
     </cfsavecontent>
 
-    <!--- remove the temporary 'work' file --->
-    <cffile ACTION="delete"
-            file="#arguments.configBean.getTempDir()##cffile.serverfile#" >
+    <cfif (arguments.ML_Users eq "ML")>
+	    <!--- remove the temporary 'work' file --->
+	    <cffile ACTION="delete"
+	            file="#arguments.configBean.getTempDir()##cffile.serverfile#" >
+    </cfif>
 
     <cfreturn html/>
 </cffunction>
@@ -245,6 +248,7 @@
                        ,arguments.mailinglistManager
                        ,arguments.siteid
                        ,arguments.ML_Users
+                       ,arguments.mailer
                       );
 
         if (Len(html)){
@@ -254,16 +258,18 @@
         }
     }
 
-    public string function sendWelcomeEMail(userBean, mailer, groupEmail, siteID){
+    public string function sendWelcomeMail(userBean, mailer, groupEmail, siteID, password){
 
-        var welcomeText = "Blah, blah, blah";
+        var welcomeText = "Your subscription to the EPSRC Call Alert has now been transferred to the new EPSRC website." &
+                          "You now have complete control over your personal details and subscription. Please log in using your email address and this initial password:" &
+                          arguments.password & "We strongly recommend you reset this password the first time you log in by simply entering your preferred password twice." ;
         // needed a user bean to get the call alert subscribe status
         mailer.sendTextAndHTML( welcomeText
                                ,welcomeText
                                ,userBean.getValue('email')
-                               ,groupEmail
+                               ,arguments.groupEmail
                                ,'Call Alert subscriber - Welcome to the new EPSRC website'
-                               ,siteID
+                               ,arguments.siteID
                               );
     }
 

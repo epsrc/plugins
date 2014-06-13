@@ -44,6 +44,7 @@ component persistent="false" accessors="true" output="false" extends="mura.cfobj
         rc.utility = rc.$.getServiceFactory().getBean('utility');
         rc.userFeed = rc.$.getServiceFactory().getBean('userFeed');
         rc.userFeed.setSiteID('MuraDevSite');
+        rc.mailer = rc.$.getServiceFactory().getBean('mailer');
 
         // UserFeed is all Memebers (as defined, Site, System, Private, Public whatever)
         // nb: we think private == Site (2), public == System (1)

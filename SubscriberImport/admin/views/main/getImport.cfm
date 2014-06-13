@@ -17,7 +17,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 <div class="row-fluid">
 <div class="span12">
-	<h1>Mailing List Subscribers</h1>
+    <h1>Mailing List Subscribers</h1>
     <p>Add/Remove Subscribers (public site users that are Members of and Subscribe to the chosen mailing list)</p>
     <form name="importmaillist" id="importmaillist" method="post" action="#buildURL( 'main.doImport' )#" enctype="multipart/form-data">
 <div class="tabbable tabs-left mura-ui">
@@ -51,13 +51,13 @@ http://www.apache.org/licenses/LICENSE-2.0
             <label class="control-label">MailingList or Users</label>
             <div class="controls">
             <label for="ml" class="radio inline">
-                <input type="radio" name="ML_Users" id="ml" value="ML" checked>Mailing List Member update
+                <input type="radio" name="ML_Users" id="mlu" value="ML" checked>Mailing List Member update
             </label>
             <label for="us" class="radio inline">
-                <input type="radio" name="ML_Users" id="us" value="Users" >Users update
+                <input type="radio" name="ML_Users" id="mlu" value="Users" >Users update
             </label>
             <label for="us" class="radio inline">
-                <input type="radio" name="ML_Users" id="us" value="ShowOnly">Show Users only
+                <input type="radio" name="ML_Users" id="mlu" value="ShowOnly">Show Users only
             </label>
             </div>
         </div>
@@ -90,15 +90,23 @@ http://www.apache.org/licenses/LICENSE-2.0
 <!--- Client-side JS validation here --->
 <script type="text/javascript">
     $("#importmaillist" ).submit(function(event){
-        var eMail = document.getElementById("listfile").value;
-        // validate required fields
-        var errors = 0;
-        if (eMail === "") {
-            errors++;
-        }
-        if (errors > 0){
-            alert('You must select a file!');
-        }
-        return errors === 0;
-    });
+      var ML_Users="";
+      $.each( $( '#importmaillist' ).prop( 'elements' ), function( idx, elem ) {
+            if (elem.name==='ML_Users' & $(elem).prop("checked")){
+                ML_Users = elem.value;
+            };
+      });
+      var mailfile = document.getElementById("listfile").value;
+
+      // validate required fields
+
+      var errors = 0;
+      if ((mailfile==="")&&(ML_Users==="ML")) {
+          errors++;
+      }
+      if (errors > 0){
+          alert('You must select a file! ');
+      }
+      return errors === 0;
+  });
 </script>
