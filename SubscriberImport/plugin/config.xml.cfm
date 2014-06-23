@@ -8,23 +8,42 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 --->
 <cfinclude template="../includes/fw1config.cfm" />
-<cfoutput><plugin>
-	<name>Subscriber Import</name>
-	<package>#variables.framework.package#</package>
-	<directoryFormat>packageOnly</directoryFormat>
-	<provider>Bill Tudor</provider>
-	<providerURL>http://epsrc.ac.uk</providerURL>
-	<loadPriority>5</loadPriority>
-	<version>#variables.framework.packageVersion#</version>
-	<category>Application</category>
-	<ormcfclocation />
-	<customtagpaths />
-	<mappings />
-	<settings />
-	<eventHandlers>
-		<eventHandler event="onApplicationLoad" component="includes.eventHandler" persist="false" />
-	</eventHandlers>
-	<displayobjects location="global">
-		<displayobject name="Simple Display Object (unused)" displayobjectfile="includes/display_objects/simple.cfm" />
-	</displayobjects>
-</plugin></cfoutput>
+<cfoutput>
+<plugin>
+    <name>Subscriber Import</name>
+    <package>#variables.framework.package#</package>
+    <directoryFormat>packageOnly</directoryFormat>
+    <provider>Bill Tudor</provider>
+    <providerURL>http://epsrc.ac.uk</providerURL>
+    <loadPriority>5</loadPriority>
+    <version>#variables.framework.packageVersion#</version>
+    <category>Application</category>
+    <ormcfclocation />
+    <customtagpaths />
+    <mappings />
+    <settings />
+    <eventHandlers>
+         <eventHandler event="onApplicationLoad" component="includes.eventHandler" persist="false" />
+    </eventHandlers>
+    <displayobjects location="global">
+         <displayobject name="Simple Display Object (unused)" displayobjectfile="includes/display_objects/simple.cfm" />
+    </displayobjects>
+
+    <extensions>
+        <extension type="Site">
+            <attributeset name="Subscriber">
+                <attribute
+                    name="showSubscriberLogin"
+                    label="Allow Subscriber Login or Register"
+                    hint="Allow Subscribers to Login or Register via Front End"
+                    type="selectBox"
+                    defaultValue="No"
+                    required="true"
+                    optionList="Yes^No"
+                    optionLabelList="Yes^No"
+                />
+            </attributeset>
+        </extension>
+    </extensions>
+</plugin>
+</cfoutput>

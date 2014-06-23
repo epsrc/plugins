@@ -1,12 +1,16 @@
 <cfcomponent extends="mura.cfobject" output="false" persistent="false" accessors="true" >
 
-<cffunction name="init" access="public" returntype="any" output="false">
-<!---
-    <cfset var fileDelim="/"/>
-    <cfset fileDelim = rc.configBean.getFileDelim() />
- --->
-    <cfreturn this />
-</cffunction>
+<cfscript>
+    public string function doInit(args arguments) {
+        WriteDump(arguments.mailingListName);
+        //abort;
+        variables.mailingListName = arguments.mailingListName;
+        variables.$ = arguments.$;
+        variables.utility = arguments.utility;
+        variables.emailUtility = arguments.emailUtility;
+        variables.helpersUtils = arguments.helpersUtils;
+    }
+</cfscript>
 
 <cffunction name="upload" access="public" returntype="string" output="true">
     <cfargument name="listBean" type="any" />
@@ -263,14 +267,29 @@
         var welcomeText = "Your subscription to the EPSRC Call Alert has now been transferred to the new EPSRC website." &
                           "You now have complete control over your personal details and subscription. Please log in using your email address and this initial password:" &
                           arguments.password & "We strongly recommend you reset this password the first time you log in by simply entering your preferred password twice." ;
-        // needed a user bean to get the call alert subscribe status
-        mailer.sendTextAndHTML( welcomeText
-                               ,welcomeText
-                               ,userBean.getValue('email')
-                               ,arguments.groupEmail
-                               ,'Call Alert subscriber - Welcome to the new EPSRC website'
-                               ,arguments.siteID
-                              );
+
+        var args= { emailID = "Reactivate Subscriber Account"
+                   ,template = "welcome_new_site_user_account.cfm"
+                   ,format = "HTML & Text"
+                   ,siteID = siteID
+                   ,domain = variables.$.getSite(siteID).getDomain("production")
+                   ,site = variables.$.getSite(siteID).getSite()
+                   ,from = arguments.groupEmail
+                   ,email = arguments.userBean.getValue('email')
+                   ,subject = "#variables.$.getSite(siteID).getSite()# - Welcome to the new website - Subscriber Activation"
+                   ,bodyText = welcomeText
+                   ,bodyHtml = welcomeText
+                   ,utility = variables.utility
+                   ,emailUtility = variables.emailUtility
+                   ,emailer = arguments.mailer
+                   ,numbersent = 0
+                   ,replyto = arguments.groupEmail
+                   ,initialPassword = arguments.password
+                   ,settingsManager = application.settingsManager
+                   ,configBean = application.configBean
+                  };
+
+        return variables.helpersUtils.sendSingleEmailViaTemplate(args);
     }
 
 </cfscript>

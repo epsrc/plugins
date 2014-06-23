@@ -34,6 +34,7 @@
             </div>
         </div>
 
+<!---
         <div class="control-group">
             <label class="control-label">Call Mura ID to use</label>
             <div class="controls">
@@ -42,6 +43,7 @@
                 </label>
             </div>
         </div>
+ --->
 
         <div class="control-group">
             <label class="control-label">Limit batches to:</label>
