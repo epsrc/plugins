@@ -124,34 +124,10 @@ component persistent="false" accessors="true" output="false" extends="controller
                 }
                 <!--- TODO: use a Call Alert Summary email template to personalise the call alert email and
                       transpose the fields ? --->
+                var emailBodyLayout = "..\..\common\layouts\emails\call_alert_summary.cfm";
                 savecontent variable="bodyHTML"
                 {
-                    //include '#emailBodyLayout#';
-
-                    WriteOutput(title & '</br>');
-                    if (len(issueDate)){
-                        WriteOutput('Issue Date:' & dateformat(issueDate,'dd Mmm yyyy') & '</br>');
-                    }
-                    if (len(callOpenDate)){
-                        WriteOutput('Call Open Date:' & dateformat(callOpenDate,'dd Mmm yyyy') & '</br>');
-                    }
-                    if (len(callClosingDate)){
-	                    WriteOutput('Call Closing Date:' & dateformat(callClosingDate,'dd Mmm yyyy'));
-	                    if (len(callClosingTime)){
-	                        WriteOutput(timeformat(callClosingTime,'HH:mm') & '</br>');
-	                    }else{
-	                        WriteOutput('</br>');
-	                    }
-                    }
-                    if (len(relatedTheme)){
-                        WriteOutput('Related Themes):' & relatedTheme & '</br>');
-                    }
-                    if (len(calltype)){
-                        WriteOutput('Call Type:' & callType & '</br>');
-                    }
-                    if (len(summary)){
-                        WriteOutput('<p>' & summary & '</p></hr>');
-                    }
+                    include '#emailBodyLayout#';
                 }
                 callAlertText &= bodyHTML & '</br>';
 
@@ -166,47 +142,47 @@ component persistent="false" accessors="true" output="false" extends="controller
 
             <!--- Only if there are Calls --->
             if (cnt GT 0) {
-	            var userManager = $.getBean('userManager');
-	            var groups = userManager.getPublicGroups(siteID);
-	            var qGroupID = new Query(sql = "SELECT userID,Email FROM groups WHERE groupname LIKE 'Call Alert'",
-	                                     dbtype = "query",
-	                                     groups = groups
-	                                    );
-	            // irritating that Mura uses userID when it means groupID...!
-	            var groupID = qGroupID.execute().getResult().userID;
-	            var groupEmail = qGroupID.execute().getResult().Email;
-	            var qMembers = $.getBean('userManager').readGroupMemberships(groupID);
+                var userManager = $.getBean('userManager');
+                var groups = userManager.getPublicGroups(siteID);
+                var qGroupID = new Query(sql = "SELECT userID,Email FROM groups WHERE groupname LIKE 'Call Alert'",
+                                         dbtype = "query",
+                                         groups = groups
+                                        );
+                // irritating that Mura uses userID when it means groupID...!
+                var groupID = qGroupID.execute().getResult().userID;
+                var groupEmail = qGroupID.execute().getResult().Email;
+                var qMembers = $.getBean('userManager').readGroupMemberships(groupID);
 
-	            <!--- loop for all active subscribed members --->
-	            for (intRow = 1; intRow LTE qMembers.RecordCount; intRow++){
+                <!--- loop for all active subscribed members --->
+                for (intRow = 1; intRow LTE qMembers.RecordCount; intRow++){
 
-	                if (qMembers["inActive"][intRow] eq 0 and qMembers["subscribe"][intRow] eq 1){
+                    if (qMembers["inActive"][intRow] eq 0 and qMembers["subscribe"][intRow] eq 1){
 
-	                    // needed a user bean to get the call alert subscribe status
-	                    var userBean = userManager.getBean('user');
-	                    userBean.setSiteID(siteID);
-	                    userBean.loadBy(userName=qMembers["email"][intRow]);
-	                    <!--- the field 'qMembers.subscribe' really means 'use Mura email broadcaster'
-	                          the class extension here is what thw user themselves sets in their preferences
-	                          So we could also use the frequency preference here as well --->
-	                    if ( userBean.getValue('subscribeCallAlert') eq 'Subscriber' ){
-	                        <!--- NB: THIS CAN POTENTIALLY SEND 100's of emails !!! --->
-	                        mailer.sendTextAndHTML( callAlertText
-	                                               ,callAlertText
-	                                               ,userBean.getValue('email')
-	                                               ,groupEmail
-	                                               ,subject
-	                                               ,siteID
-	                                              );
-	                        cnt += 1;
-	                    }
-	                }
-	                // add a delay to let the server-side resources (ie Mail server etc) 'catch up' with the lightning that is Mura...
-	                if (cnt gte val(rc.batchlimit)){
-	                    sleep(rc.batchlimit*200);
-	                    cnt = 0;
-	                }
-	            } // for each member
+                        // needed a user bean to get the call alert subscribe status
+                        var userBean = userManager.getBean('user');
+                        userBean.setSiteID(siteID);
+                        userBean.loadBy(userName=qMembers["email"][intRow]);
+                        <!--- the field 'qMembers.subscribe' really means 'use Mura email broadcaster'
+                              the class extension here is what thw user themselves sets in their preferences
+                              So we could also use the frequency preference here as well --->
+                        if ( userBean.getValue('subscribeCallAlert') eq 'Subscriber' ){
+                            <!--- NB: THIS CAN POTENTIALLY SEND 100's of emails !!! --->
+                            mailer.sendTextAndHTML( callAlertText
+                                                   ,callAlertText
+                                                   ,userBean.getValue('email')
+                                                   ,groupEmail
+                                                   ,subject
+                                                   ,siteID
+                                                  );
+                            cnt += 1;
+                        }
+                    }
+                    // add a delay to let the server-side resources (ie Mail server etc) 'catch up' with the lightning that is Mura...
+                    if (cnt gte val(rc.batchlimit)){
+                        sleep(rc.batchlimit*200);
+                        cnt = 0;
+                    }
+                } // for each member
             }
 
         } // if called to Run by request
