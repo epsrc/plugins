@@ -78,18 +78,8 @@ component persistent="false" accessors="true" output="false" extends="controller
             var feed = $.getBean('feed').loadBy(name=form.feedname);
             var flds = ListToArray(feed.getDisplayList());
             var iterator = feed.getIterator();
-            var subject = "Call Alert Summary";
-
-            var callAlertText = '';
-
-            savecontent variable="headHTML"
-            {
-                WriteOutput('<html><head><title>' & subject & '</title><meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">');
-                WriteOutput('</head><body text="##000000" link="##000000" vlink="##000000" alink="##000000" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0" >');
-            }
-            callAlertText &= headHTML;
-
             <!--- each Call in the feed --->
+            var callAlertBody = '';
             while (iterator.hasNext()) {
                 var item = iterator.next();
 
@@ -129,19 +119,16 @@ component persistent="false" accessors="true" output="false" extends="controller
                 {
                     include '#emailBodyLayout#';
                 }
-                callAlertText &= bodyHTML & '</br>';
-
+                callAlertBody &= bodyHtml;
                 cnt++;
             } // feed iterator loop
 
-            savecontent variable="footHTML"
-            {
-                WriteOutput('</body></html>');
-            }
-            callAlertText &= footHTML;
-
             <!--- Only if there are Calls --->
             if (cnt GT 0) {
+                var subject = "Call Alert Summary";
+                var callAlertText = '';
+
+                // get Call Alert Member group stuff
                 var userManager = $.getBean('userManager');
                 var groups = userManager.getPublicGroups(siteID);
                 var qGroupID = new Query(sql = "SELECT userID,Email FROM groups WHERE groupname LIKE 'Call Alert'",
@@ -166,9 +153,30 @@ component persistent="false" accessors="true" output="false" extends="controller
                               the class extension here is what thw user themselves sets in their preferences
                               So we could also use the frequency preference here as well --->
                         if ( userBean.getValue('subscribeCallAlert') eq 'Subscriber' ){
-                            <!--- NB: THIS CAN POTENTIALLY SEND 100's of emails !!! --->
-                            mailer.sendTextAndHTML( callAlertText
-                                                   ,callAlertText
+
+                            // these vars are neeeded in the header email layout template
+                            var firstname = iif(qMembers["Fname"][intRow] eq 'Unknown','','qMembers["Fname"][intRow]');
+                            var lastname = iif(qMembers["Lname"][intRow] eq 'Unknown','','qMembers["Lname"][intRow]');
+                            var username = qMembers["email"][intRow];
+                            var emailHeaderLayout = "..\..\common\layouts\emails\call_alert_summary_header.cfm";
+                            savecontent variable="headHTML"
+                            {
+                                include '#emailHeaderLayout#';
+                            }
+
+                            // these vars are neeeded in the footer email layout template
+                            var unsubscribe = makeUnsubscribeLink(rc, subject, userBean.getValue('email'));
+                            var emailFooterLayout = "..\..\common\layouts\emails\call_alert_summary_footer.cfm";
+                            savecontent variable="footHTML"
+                            {
+                                include '#emailFooterLayout#';
+                            }
+
+                            var emailText = headHTML & callAlertBody & footHTML;
+
+                            <!--- NB: THIS CAN POTENTIALLY SEND 100's of emails hence the counta and inbuilt delay --->
+                            mailer.sendTextAndHTML( emailText
+                                                   ,emailText
                                                    ,userBean.getValue('email')
                                                    ,groupEmail
                                                    ,subject
@@ -189,4 +197,22 @@ component persistent="false" accessors="true" output="false" extends="controller
 
     } // runMailshot
 
+    private string function makeUnsubscribeLink(required rc,
+                                                string emailID,
+                                                string emailaddress){
+
+        var scheme = rc.settingsManager.getSite(rc.siteID).getScheme()
+        var domain = rc.$.getSite(rc.siteID).getDomain("production");
+
+        var unsubscription = scheme & '://' &
+                             domain &
+                             rc.configBean.getServerPort() &
+                             rc.configBean.getContext() &
+                             '?doaction=unsubscription&emailid=' &
+                             arguments.emailid &
+                             '&email=' &
+                             arguments.emailaddress &
+                             '&nocache=1&mailingList=Call Alert';
+        return unsubscription;
+    }
 }
