@@ -30,7 +30,7 @@ component persistent="false" accessors="true" output="false" extends="controller
 
         // invoke MAILSHOT service by pressing Go (submit) button on form...
         variables.fw.service('runMailshot.doInit', 'RESULT', rc);
-        variables.fw.service('runMailshot.doMailshot', 'RESULT', form);
+        variables.fw.service('runMailshot.doMailshot', 'RESULT', rc);
 
     }
 
@@ -38,6 +38,9 @@ component persistent="false" accessors="true" output="false" extends="controller
     public any function loadADContacts(required rc){
         // invoke services here...
         variables.fw.service('importADContacts.doInit', 'RESULT', rc);
-        variables.fw.service('importADContacts.doImport', 'RESULT');
+        variables.fw.service('importADContacts.doImport', 'importServiceResult', rc);
+
+        // after this controller invocation a View is expected of the same name as the controller method
+        // i.e. loadADContacts...in admin/main/
     }
 }

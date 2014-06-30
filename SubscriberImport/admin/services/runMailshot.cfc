@@ -30,7 +30,6 @@
         LISTBEAN                26          Component (mura.mailinglist.mailinglistBean)
  --->
         variables.$ = arguments.$;
-        variables.batchlimit = Val(arguments.batchlimit);
         variables.configBean = arguments.configbean;
         variables.settingsManager = arguments.settingsManager;
         variables.siteID = arguments.siteid;
@@ -38,7 +37,8 @@
 
     public any function doMailshot() {
 
-        if (isDefined("variables.batchlimit")){
+        // if called by a POST on a Go/Submit form button, 'form' scope will be populated...
+        if (isDefined("form.batchlimit")){
 
             var mailer = application.serviceFactory.getBean('mailer');
             var manager = application.serviceFactory.getBean('emailManager');
@@ -170,8 +170,8 @@
                         }
                     }
                     // add a delay to let the server-side resources (ie Mail server etc) 'catch up' with the lightning that is Mura...
-                    if (cnt gte variables.batchlimit){
-                        sleep(variables.batchlimit*200);
+                    if (cnt gte val(form.batchlimit)){
+                        sleep(val(form.batchlimit)*200);
                         cnt = 0;
                     }
                 } // for each member
