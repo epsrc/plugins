@@ -59,6 +59,10 @@ http://www.apache.org/licenses/LICENSE-2.0
                                     <li class="<cfif rc.action eq 'admin:main.runMailshot'>active</cfif>">
                                         <a href="#buildURL('admin:main.runMailshot')#"><i class="icon-leaf"></i> Run Mailshot</a>
                                     </li>
+
+                                    <li class="<cfif rc.action eq 'admin:main.loadADContacts'>active</cfif>">
+                                        <a href="#buildURL('admin:main.loadADContacts')#"><i class="icon-leaf"></i> Load AD Contacts directory</a>
+                                    </li>
                                 </ul>
                             </li>
                             <li class="<cfif rc.action contains 'admin:license'>active</cfif>">
@@ -90,6 +94,10 @@ http://www.apache.org/licenses/LICENSE-2.0
 
                             <li class="<cfif rc.action eq 'admin:main.runMailshot'>active</cfif>">
                                 <a href="#buildURL('admin:main.runMailshot')#"><i class="icon-leaf"></i> Run Mailshot</a>
+                            </li>
+
+                            <li class="<cfif rc.action eq 'admin:main.loadADContacts'>active</cfif>">
+                                <a href="#buildURL('admin:main.loadADContacts')#"><i class="icon-leaf"></i> Load AD Contacts directory</a>
                             </li>
                         </ul>
                     </div>
