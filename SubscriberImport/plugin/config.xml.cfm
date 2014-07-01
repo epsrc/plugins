@@ -44,6 +44,34 @@ http://www.apache.org/licenses/LICENSE-2.0
                 />
             </attributeset>
         </extension>
+        <extension type="Address">
+            <attributeset name="Contacts Directory (AD)">
+                <attribute
+                    name="contactsDirTitle"
+                    label="Preferred Title"
+                    hint="Title to prefix the Contact name with"
+                    type="textBox"
+                />
+                <attribute
+                    name="contactsDirWorkArea"
+                    label="Work area/Organisation Description"
+                    hint="General Contact work are or description"
+                    type="textBox"
+                />
+                <attribute
+                    name="contactsDirJobTitle"
+                    label="Job Title"
+                    hint="The Contact Job Title"
+                    type="textBox"
+                />
+                <attribute
+                    name="contactsDirJobFunctions"
+                    label="Job Functions"
+                    hint="The Contact Job Functions"
+                    type="textArea"
+                />
+            </attributeset>
+        </extension>
     </extensions>
 </plugin>
 </cfoutput>
