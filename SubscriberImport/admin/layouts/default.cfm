@@ -61,7 +61,7 @@ http://www.apache.org/licenses/LICENSE-2.0
                                     </li>
 
                                     <li class="<cfif rc.action eq 'admin:main.loadADContacts'>active</cfif>">
-                                        <a href="#buildURL('admin:main.loadADContacts')#"><i class="icon-leaf"></i> Load AD Contacts directory</a>
+                                        <a href="#buildURL('admin:main.loadADContacts')#" onclick="confirmDialog('WARNING: Do you really want to update Contacts Directory Site Members Group data?',function(){actionModal(this.href)});"><i class="icon-leaf"></i> Load AD Contacts directory</a>
                                     </li>
                                 </ul>
                             </li>
@@ -97,7 +97,7 @@ http://www.apache.org/licenses/LICENSE-2.0
                             </li>
 
                             <li class="<cfif rc.action eq 'admin:main.loadADContacts'>active</cfif>">
-                                <a href="#buildURL('admin:main.loadADContacts')#"><i class="icon-leaf"></i> Load AD Contacts directory</a>
+                                <a href="#buildURL('admin:main.loadADContacts')#" onclick="confirmDialog('WARNING: Do you really want to update Contacts Directory Site Members Group data?',function(){actionModal(this.href)});"><i class="icon-leaf"></i> Load AD Contacts directory</a>
                             </li>
                         </ul>
                     </div>

@@ -79,17 +79,18 @@
         }else{
             var groupname = 'Contacts Directory';
             var groupID   = getMuraGroupID(groupname);
-            var cnt = 1;
+            var cnt = 0;
             for (contact in qry){
-
+                //if ((contact.lastname eq "Coates") and (contact.firstname eq "Catherine")){
                 // get contact info in step with Mura
                 UpdateMemberUser(contact,
                                  groupID,
                                  groupname,
                                  getJobFunctionsString(jobs, contact.PersonID));
 
-                // delay and count cos I do not trust ORM, Railo, Mura, MSSQL or even Cf to execute code reliably in this shite sytem...
-                sleep(100);
+                    // delay and count cos I do not trust ORM, Railo, Mura, MSSQL or even Cf to execute code reliably in this shite server environment...
+                    sleep(100);
+                //}
                 cnt++;
             }
             return "Success - #cnt# updated";
@@ -177,16 +178,13 @@
         var addressBean = getBean("addressBean");
         var addressID = getContactDirectory(userBean.getAddresses())
         var newone = false;
+
         if (len(addressID)){
-            addressBean.setAddressID(addressID);
-            //variables.userManager.updateAddress(userBean);
+            addressBean = userBean.getAddressBeanById(addressID);
         }else{
             addressBean.setAddressID(createuuid());
             newone = true;
-            //addressBean.set(arguments.data);
-            //userBean=read(addressBean.getUserID());
         }
-
         // the user 'address' attributes...
         addressBean.setSiteID(userBean.getSiteID());
         addressBean.setUserID(userBean.getUserID());
@@ -195,12 +193,19 @@
         addressBean.setValue('phone',contact.phone);
         addressBean.setValue('addressname','Contacts Directory');
 
-        // extended attributes DOES FUCK ALL - just more Mura Obscura SHITE (but no error messgaes note) !!!
-        //addressBean.setValue('contactsDirTitle', contact.title);
-        //addressBean.setValue('contactsDirWorkArea', contact.orgDescription);
-        //addressBean.setValue('contactsDirJobTitle', contact.jobtitlename);
-        //addressBean.setValue('contactsDirJobFunctions', arguments.jobfunctions);
-
+        if (not newone){
+            addressBean.setValue('ADDRESS1', addressBean.getValue('ADDRESS1'));
+            addressBean.setValue('ADDRESS2', addressBean.getValue('ADDRESS2'));
+            addressBean.setValue('ADDRESSURL', addressBean.getValue('ADDRESSURL'));
+            addressBean.setValue('CITY', addressBean.getValue('CITY'));
+            addressBean.setValue('COUNTRY', addressBean.getValue('COUNTRY'));
+            addressBean.setValue('FAX', addressBean.getValue('FAX'));
+            addressBean.setValue('HOURS', addressBean.getValue('HOURS'));
+            addressBean.setValue('STATE', addressBean.getValue('STATE'));
+            addressBean.setValue('ZIP', addressBean.getValue('ZIP'));
+        }
+        addressBean.save();
+        // extended attributes
         if (structIsEmpty(addressBean.getErrors())){
 
             if (local.newone){
@@ -218,14 +223,14 @@
 
                 var data = StructNew();
                 data.siteID = addressBean.getSiteID();
+                data.addressID = addressBean.getAddressID();
+                data.userID = userBean.getUserID();
+                data.extendSetId = id;
+
                 data.contactsDirTitle = contact.title;
                 data.contactsDirWorkArea = contact.orgDescription;
                 data.contactsDirJobTitle = contact.jobtitlename;
                 data.contactsDirJobFunctions = arguments.jobfunctions;
-
-                data.addressID = addressBean.getAddressID();
-                data.userID = userBean.getUserID();
-                data.extendSetId = id;
 
                 variables.ClassExtensionManager.saveExtendedData( addressBean.getAddressID(),
                                                                   data,
