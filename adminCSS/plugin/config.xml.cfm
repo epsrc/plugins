@@ -4,7 +4,7 @@
         <package>adminCSS</package>
         <directoryFormat>packageOnly</directoryFormat>
         <loadPriority>5</loadPriority>
-        <version>1</version>
+        <version>1.0.1</version>
         <provider>Jim Cumming</provider>
         <providerURL></providerURL>
         <category>Utility</category>

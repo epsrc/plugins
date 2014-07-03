@@ -4,7 +4,7 @@
 This file is part of MuraFW1
 
 Copyright 2010-2014 Stephen J. Withington, Jr.
-Licensed under the Apache License, Version v2.0
+Licensed under the Apache License, v2.0
 http://www.apache.org/licenses/LICENSE-2.0
 
 	NOTES:
@@ -17,8 +17,10 @@ http://www.apache.org/licenses/LICENSE-2.0
 	variables.framework = {};
 
 	// !important: enter the plugin packageName here. must be the same as found in '{context}/plugin/config.xml.cfm'
+    // not bnecessarily true I find - as I have SubscriberImport here and the name in config is Subscriber Import, so WTF?
+    // another misleading and confusing directive (when there finally is documentation it sucks) cheers
 	variables.framework.package = 'SubscriberImport';
-	variables.framework.packageVersion = '1.0.0';
+	variables.framework.packageVersion = '1.1.0';
 
 	// If true, then additional information is returned by the Application.onError() method
 	// and FW1 will 'reloadApplicationOnEveryRequest' (unless explicitly set otherwise below).

@@ -1,18 +1,20 @@
-+++ ------------------------------------------------------------------------------------------------- +++ 
+------------------------------------------------------------------------------------------------ 
 
-                             Welcome to the Subscriber Import Plugin
-                             =======================================
+                          Welcome to the Subscriber Import Plugin
+                          =======================================
 
 
     BEFORE RUNNING ANY IMPORT IT IS ESSENTIAL THAT YOU SET UP A SITE MEMBER USER GROUP WITH EXACTLY 
-    THE SAME NAME AS THE MAILING LIST - IN EPSRC'S (INITIAL) CASE THIS IS 'CALL ALERT' !
+    THE SAME NAME AS THE MAILING LIST - IN EPSRC'S (INITIAL) CASE THIS IS 'CALL ALERT'.
     
-    PLEASE ALSO READ THE TEXT ON THE HOME SCREEN AND THE INSTRUCTIONS BEFORE YOU USE THIS PLUGIN !
+    YOU MUST ALSO HAVE A SITE MEMBER GROUP CALLED 'CONTACTS DIRECTORY' IF YOU WANT TO MANUALLY 
+    RUN THE CONTACTS DIRECTORY 'SYNCH' OPTION.  
+    
+    PLEASE ALSO READ THE TEXT ON THE HOME SCREEN AND THE INSTRUCTIONS BEFORE YOU USE THIS PLUGIN.
     
     BY ACCEPTING THESE TERMS YOU HAVE ACKNOWLEDGED THAT YOU HAVE READ AND UNDERSTOOD THE PURPOSE
-    (AND LIMITATIONS) OF THIS PLUGIN !
-    
-    IF YOU HAVE ANY QUESTIONS PLEASE ASK BEFORE RUNNING ANY IMPORTS...
+    (AND LIMITATIONS) OF THIS PLUGIN...
+      
+    IF YOU HAVE ANY QUESTIONS PLEASE ASK BEFORE RUNNING ANY OF THE OPTIONS...
 
-
-+++ ------------------------------------------------------------------------------------------------- +++
+-------------------------------------------------------------------------------------------------
