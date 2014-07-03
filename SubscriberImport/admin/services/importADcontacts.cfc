@@ -81,6 +81,7 @@
             var groupID   = getMuraGroupID(groupname);
             var cnt = 0;
             for (contact in qry){
+                //if ((contact.lastname eq "Bailey") and (contact.firstname eq "Catherine")){
                 //if ((contact.lastname eq "Coates") and (contact.firstname eq "Catherine")){
                 // get contact info in step with Mura
                 UpdateMemberUser(contact,

@@ -46,6 +46,7 @@ component persistent="false" accessors="true" output="false" extends="mura.cfobj
         rc.userFeed = rc.$.getServiceFactory().getBean('userFeed');
         rc.userFeed.setSiteID('MuraDevSite');
         rc.mailer = rc.$.getServiceFactory().getBean('mailer');
+        // BT,03.07.14: this can only work for sites with EPSRC theme set !!!
         rc.helpersUtils = CreateObject("component", "#$.siteConfig('themeAssetPath')#\helpers\utils");
 
         // UserFeed is all Memebers (as defined, Site, System, Private, Public whatever)
